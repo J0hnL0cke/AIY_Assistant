@@ -1,4 +1,4 @@
-Assistant that can understand and respond to user queries.
+Assistant built for the Google Voice AIY that can understand and respond to user voice queries.
 
 
 **Features:**
@@ -6,10 +6,10 @@ Assistant that can understand and respond to user queries.
 - Speech recognition
 - Text-to-speech
 - Persistent memory between sessions
-- changing button LED colors
+- Changing button LED colors
 - Ability to change device volume
-- Can store queries that are not understood
-- Can give device IP address
+- Ability to store queries that are not understood
+- Ability to give device IP address
 
 More features, such as ability to play music and record audio on demand, are planned for the future
 
