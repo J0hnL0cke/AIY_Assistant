@@ -1,15 +1,15 @@
-Recognizer that can understand and respond to user queries
+Assistant that can understand and respond to user queries.
 
 
 **Features:**
-Hotword detection
-Speech recognition
-Text-to-speech
-Persistent memory between sessions
-changing button LED colors
-Ability to change device volume
-Can store queries that are not understood
-Can give device IP address
+- Hotword detection
+- Speech recognition
+- Text-to-speech
+- Persistent memory between sessions
+- changing button LED colors
+- Ability to change device volume
+- Can store queries that are not understood
+- Can give device IP address
 
 More features, such as ability to play music and record audio on demand, are planned for the future
 
