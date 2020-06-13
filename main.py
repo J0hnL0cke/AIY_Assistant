@@ -1,16 +1,5 @@
 #Import statements at bottom of file
 
-#Improved recognizer that can:
-#understand and respond to user voice queries using speech recognition and tts
-#remember information between sessions using txt files
-#change button LED colors
-#change device volume
-#record audio
-#give device IP address
-
-#More features, such as ability to play music, are planned for the future
-
-
 def tab(text, tabs=1):
     print('\t'*tabs+text)
 
@@ -433,7 +422,7 @@ class hotword:
     def start(cls):
         cls.started=True
         print("Starting detector")
-        cls.detector = snowboy.HotwordDetector("Ok_Box.pmdl", sensitivity=0.5, audio_gain=1)
+        cls.detector = snowboy.HotwordDetector(files.load_file('path_to_voice_model', ''), sensitivity=0.4, audio_gain=1)
         try:
             cls.detector.start(cls.detected_callback)
         except:
@@ -464,9 +453,9 @@ class trigger:
         btn.set_event()
         
         looping=True
+        print('looping, started =',hotword.started)
         
         while looping:
-            print('looping, started =',hotword.started)
             if hotword.was_said() or btn.was_pressed():
                 print('Exiting loop')
                 looping=False
@@ -571,7 +560,7 @@ class main_thread:
         
         elif text=='ip address':
             #assistant.stop_conversation()
-            ip_address=subprocess.check_output("hostname -I | cut -d' ' -f1", shell=True)
+            ip_address=str(subprocess.check_output("hostname -I | cut -d' ' -f1", shell=True))
             speak.say("Your IP is", ip_address.replace('\n',''))
         
         elif text=='never mind' or text=='nevermind':
