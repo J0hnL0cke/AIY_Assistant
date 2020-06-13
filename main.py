@@ -710,7 +710,7 @@ class main_thread:
             files.append_file("unknown_responses", text)
             
         #Unpause music
-        if music.playing==True and music.has_music==True and :
+        if music.playing==True and music.has_music==True and cls.keep_running:
             music.pause(False)
             print('Playing song')
 
