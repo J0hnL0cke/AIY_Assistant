@@ -465,6 +465,7 @@ class trigger:
 class main_thread:
     
     initialized=False
+    keep_running=True
     
     @classmethod
     def init(cls):
@@ -506,7 +507,7 @@ class main_thread:
         speak.say('Hello')
         
         #separate function/class?
-        while True:
+        while cls.keep_running:
             lights.status_change('ready')
             lights.button_change('green')
             print('Press the button or say the hotword')
@@ -534,7 +535,7 @@ class main_thread:
             elif text is None:
                 print("Nothing to recognize")
             else:
-                main_thread.recognize(text)
+                main_thread.recognize(text.lower())
     
     @classmethod
     def starts(cls, text, beginning):
@@ -557,6 +558,11 @@ class main_thread:
             speak.say('See you in a bit!')
             lights.reset_led()
             subprocess.call('sudo reboot', shell=True)
+            
+        elif text=='close program' or text=='stop program' or text=='stop recongizer' or text=='stop recognizer':
+            speak.say('Goodbye for now.')
+            print("Closing program...")
+            cls.keep_running=False
         
         elif text=='ip address':
             #assistant.stop_conversation()
@@ -704,7 +710,7 @@ class main_thread:
             files.append_file("unknown_responses", text)
             
         #Unpause music
-        if music.playing==True and music.has_music==True:
+        if music.playing==True and music.has_music==True and :
             music.pause(False)
             print('Playing song')
 
