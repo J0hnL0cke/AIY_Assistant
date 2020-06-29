@@ -29,6 +29,8 @@ I used ~/AIY-projects-python/src/aiy/recognizer because that's where most of the
 
 Install all necessary dependencies with apt and pip. Modules that are needed have been included.
 
+If you get an error installing with pip, then try running the commands with pip3 instead.
+
 `sudo apt-get install python-pyaudio python3-pyaudio sox`
 
 `pip install pyaudio`
