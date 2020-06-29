@@ -37,7 +37,7 @@ If you get an error installing with pip3, then try running the commands using pi
 
 `pip3 install pyttsx3`
 
-`pip3 install speech_recognition`
+`pip3 install speechrecognition`
 
 
 **Configure the project**
