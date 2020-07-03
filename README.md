@@ -37,12 +37,15 @@ If you get an error installing with pip3, then try running the commands using pi
 
 `sudo apt-get install espeak`
 
+`sudo -H pip install --upgrade youtube-dl`
+
 `pip3 install pyaudio`
 
 `pip3 install pyttsx3`
 
 `pip3 install speechrecognition`
 
+`pip3 install python-vlc`
 
 **Configure the project**
 
