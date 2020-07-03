@@ -66,6 +66,8 @@ You will need to download the .pmdl/.umdl file onto the device.
 
 `mkdir data`
 
+`mkdir music`
+
 run `python3 main.py`
 
 You will immediately run into errors because your configuration files are not set up.
