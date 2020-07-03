@@ -719,7 +719,7 @@ class main_thread:
 
 print("Importing packages...")
 
-#Prints out "    Importing importlib..."
+#Let the user know that importlib is being imported, and then import it
 imp('importlib',real=False)
 #Actually imports it
 import importlib
@@ -734,18 +734,10 @@ path=os.path
 #os.chdir(package_path)
 print("Current dir is", os.getcwd())
 
-#sys=imp('sys')
-#Change the path to allow packages to be imported from that location
-#Make sure to change the data_loc variable in the files class when this variable is changed,
-#beause that path is relative to this path
-#sys.path.append(package_path)
-
-
 leds=imp('aiy.leds')
 #Initalize button light to let the user know the program is loading
 Color=leds.Color
 lights.init()
-
 
 tts=imp('pyttsx3')
 sr=imp('speech_recognition')
