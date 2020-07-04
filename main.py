@@ -299,6 +299,7 @@ class music:
         for character in title:
             if character in cls.title_chars:
                 build+=character
+        return build
     
     @classmethod
     def play_multiple(cls, reset=False):
