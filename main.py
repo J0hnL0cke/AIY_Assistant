@@ -209,7 +209,6 @@ class music:
     save_files=True
     
     
-    
     @classmethod
     def init(cls):
         tab('Loading music...')
@@ -243,6 +242,7 @@ class music:
         #TODO: Need to initialize youtube-dl
         tab('Loading VLC...', 2)
         cls.vlc_instance=vlc.get_default_instance()
+        
         #create a playlist?
         #cls.vlc_playlist=cls.vlc.media_list_new()
         #cls.vlc_player=cls.vlc_instance.media_list_player_new()
@@ -281,8 +281,7 @@ class music:
             else:
                 loc=info['url']
                 
-            cls.vlc_instance.media_new(loc)
-            cls.vlc_player.set_media(info)
+            cls.vlc_player.set_media(cls.vlc_instance.media_new(loc))
             cls.last_song=(song_title)
             speak.say(build_song)
             cls.vlc_player.play()
@@ -809,6 +808,7 @@ del audio
 vlc=imp('vlc')
 youtube_dl=imp('youtube_dl')
 string=imp("string")
+sys=imp(sys)
 #logging.basicConfig(
 #    level=logging.INFO,
 #    format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
