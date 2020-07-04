@@ -216,7 +216,7 @@ class music:
         
         tab('Loading Youtube_DL', 2)
         #Set Youtube DL options
-        ydl_opts={
+        cls.ydl_opts={
             'default_search': 'ytsearch1:',
             'format': 'bestaudio/best',
             'yesplaylist': True,
