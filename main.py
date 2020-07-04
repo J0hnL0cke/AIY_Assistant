@@ -238,7 +238,7 @@ class music:
         
         #Make a list of characters that can be said by the tts program
         #Prevents it from saying words like "opening parenthesis"
-        cls.title_chars=list(string.ascii_letters)+list(range(0,9))
+        cls.title_chars=list(string.ascii_letters)+list(range(0,9))+[' ']
         
         #TODO: Need to initialize youtube-dl
         tab('Loading VLC...', 2)
@@ -287,8 +287,8 @@ class music:
             speak.say(build_song)
             cls.vlc_player.play()
                 
-        except an_error:
-            print(an_error)
+        except:
+            print(sys.exc_info()[0])
             speak.say('Sorry, there was an error')
             cls.has_music=False
             cls.music_playing=False
