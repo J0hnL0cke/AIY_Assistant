@@ -221,6 +221,7 @@ class music:
             'yesplaylist': True,
             'quiet': False, #Quiet is false, should show info when loading songs
             'ignore-errors': True,
+            'restrict-filenames': True,
         }
         
         if cls.save_files:
