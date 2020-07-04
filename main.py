@@ -808,7 +808,7 @@ del audio
 vlc=imp('vlc')
 youtube_dl=imp('youtube_dl')
 string=imp("string")
-sys=imp(sys)
+sys=imp('sys')
 #logging.basicConfig(
 #    level=logging.INFO,
 #    format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
