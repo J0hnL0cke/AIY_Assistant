@@ -204,29 +204,57 @@ class music:
     is_playlist=False
     last_song=''
     playlist_item=0
-    ydl_opts={
-        'default_search': 'ytsearch1:',
-        'format': 'bestaudio/best',
-        'noplaylist': True,
-        'quiet': False #Quiet is false, should show info when loading songs
-    }
+    
+    #Save files to the ./music/ directory to enable faster playback. Set to false to disable saving.
+    save_files=True
+    
+    
     
     @classmethod
     def init(cls):
         tab('Loading music...')
         
+        tab('Loading Youtube_DL', 2)
+        #Set Youtube DL options
+        ydl_opts={
+            'default_search': 'ytsearch1:',
+            'format': 'bestaudio/best',
+            'yesplaylist': True,
+            'quiet': False, #Quiet is false, should show info when loading songs
+            'ignore-errors': True,
+        }
+        
+        if cls.save_files:
+            #This section saves the file as an .mp3.
+            cls.ydl_saving={'audio-format': 'mp3',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+                'outtmpl': 'music/%(title)s.%(ext)s'
+            }
+            cls.ydl_opts.update(cls.ydl_saving)
+        
+        #Make a list of characters that can be said by the tts program
+        #Prevents it from saying words like "opening parenthesis"
+        lower_letters=list(string.ascii_lowercase)
+        upper_letters=list(string.ascii_uppercase)
+        numbers=list(range(0,9))
+        
+        cls.title_chars=lower_letters+upper_letters+numbers
+        
         #TODO: Need to initialize youtube-dl
         tab('Loading VLC...', 2)
-        #TODO
-        #cls.vlc_instance=vlc.get_default_instance()
+        cls.vlc_instance=vlc.get_default_instance()
         #create a playlist?
         #cls.vlc_playlist=cls.vlc.media_list_new()
-        
         #cls.vlc_player=cls.vlc_instance.media_list_player_new()
-        #cls.vlc_player=cls.vlc_instance.media_player_new()
         
-        #cls.vlc_event_manager=cls.vlc_player.event_manager()
-        #cls.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, cls._song_finished, 1)
+        cls.vlc_player=cls.vlc_instance.media_player_new()
+        
+        cls.vlc_event_manager=cls.vlc_player.event_manager()
+        cls.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, cls._song_finished, 1)
     
     @classmethod
     def play_music(cls, name):
@@ -235,28 +263,46 @@ class music:
         meta=[]
         try:
             with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
-                meta=ydl.extract_info(name, download=False)
+                meta=ydl.extract_info(name, download=cls.save_files)
         except Exception:
             print("Can't find", name)
             speak.say("Sorry, I can't find that song.")
         
+        
+        cls.has_music=True
+        cls.music_playing=True
+        
         if meta!=[]:
-            cls.has_music=True
-            cls.music_playing=True
             info=meta['entries'][0]
             song_title=str(info['title'])
-            cleanup_title=song_title.replace('-', ',').replace(' ,', ',').replace('[', '').replace(']', '').replace("'", '').replace('"', '')
-            build_song=' '.join(['Playing', cleanup_title])
+            build_song=' '.join(['Playing', cls.cleanup_title(song_title)])
             print(build_song)
-            try:
-                info=cls.vlc_instance.media_new(info['url'])
-                cls.vlc_player.set_media(info)
-                cls.last_song=(song_title)
-                speak.say(build_song)
-                cls.vlc_player.play()
-            except an_error:
-                print(an_error)
-                speak.say('Sorry, there was an error')
+        
+        try:
+            
+            if cls.save_files:
+                loc=ydl.prepare_filename(meta)
+            else:
+                loc=info['url']
+                
+            cls.vlc_instance.media_new(loc)
+            cls.vlc_player.set_media(info)
+            cls.last_song=(song_title)
+            speak.say(build_song)
+            cls.vlc_player.play()
+                
+        except an_error:
+            print(an_error)
+            speak.say('Sorry, there was an error')
+            cls.has_music=False
+            cls.music_playing=False
+    
+    @classmethod
+    def cleanup_title(cls,title):
+        build=''
+        for character in title:
+            if character in cls.title_chars:
+                build+=character
     
     @classmethod
     def play_multiple(cls, reset=False):
@@ -422,7 +468,7 @@ class hotword:
     def start(cls):
         cls.started=True
         print("Starting detector")
-        cls.detector = snowboy.HotwordDetector(files.load_file('path_to_voice_model', ''), sensitivity=0.4, audio_gain=1)
+        cls.detector = snowboy.HotwordDetector(files.load_file('path_to_voice_model', './model.pmdl'), sensitivity=0.4, audio_gain=1)
         try:
             cls.detector.start(cls.detected_callback)
         except:
@@ -763,8 +809,8 @@ del audio
 #TODO: need to install ytdl and vlc
 
 #Import for playing songs:
-#vlc=imp('vlc') (uncomment these after installing)
-#youtube_dl=imp('youtube_dl')
+vlc=imp('vlc')
+youtube_dl=imp('youtube_dl')
 #logging.basicConfig(
 #    level=logging.INFO,
 #    format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
