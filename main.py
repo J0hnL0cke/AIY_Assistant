@@ -238,11 +238,7 @@ class music:
         
         #Make a list of characters that can be said by the tts program
         #Prevents it from saying words like "opening parenthesis"
-        lower_letters=list(string.ascii_lowercase)
-        upper_letters=list(string.ascii_uppercase)
-        numbers=list(range(0,9))
-        
-        cls.title_chars=lower_letters+upper_letters+numbers
+        cls.title_chars=list(string.ascii_letters)+list(range(0,9))
         
         #TODO: Need to initialize youtube-dl
         tab('Loading VLC...', 2)
@@ -811,6 +807,7 @@ del audio
 #Import for playing songs:
 vlc=imp('vlc')
 youtube_dl=imp('youtube_dl')
+string=imp("string")
 #logging.basicConfig(
 #    level=logging.INFO,
 #    format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
