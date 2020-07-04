@@ -260,6 +260,7 @@ class music:
         meta=[]
         try:
             with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
+                print("ydl loaded")
                 meta=ydl.extract_info(name, download=cls.save_files)
         except Exception:
             print("Can't find", name)
@@ -267,7 +268,7 @@ class music:
         
         
         cls.has_music=True
-        cls.music_playing=True
+        cls.playing=True
         
         if meta!=[]:
             info=meta['entries'][0]
@@ -291,7 +292,7 @@ class music:
             print(sys.exc_info()[0])
             speak.say('Sorry, there was an error')
             cls.has_music=False
-            cls.music_playing=False
+            cls.playing=False
     
     @classmethod
     def cleanup_title(cls,title):
@@ -299,7 +300,7 @@ class music:
         for character in title:
             if character in cls.title_chars:
                 build+=character
-        return build
+        return build.replace("  "," ").replace(" ","_")
     
     @classmethod
     def play_multiple(cls, reset=False):
@@ -654,12 +655,12 @@ class main_thread:
         elif text=='pause' or text=='stop':
             if music.has_music==True and music.playing==True:
                 #no need to pause because song is already paused
-                cls.music_playing=False
+                cls.music.playing=False
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':
             if music.has_music==True and music.playing==False:
-                cls.music_playing=True
+                cls.music.playing=True
                 speak.say('Okay')
         
         #Here, recognition of the string based on text.startswith('x') is allowed.
@@ -678,7 +679,7 @@ class main_thread:
                     music.play_multiple(True)
             else:
                 music.has_music=False
-                music.music_playing=False
+                music.playing=False
                 music.play_music(text.replace('play ', '', 1))
         
         elif cls.starts(text, 'volume'):
@@ -789,7 +790,7 @@ time=imp('time')
 random=imp('random')
 snowboy=imp('snowboy.snowboydecoder')
 threading=imp('threading')
-subprocess=imp('subprocess')#Used for checking IP address and changing/getting volume
+subprocess=imp('subprocess') #Used for checking IP address and changing/getting volume
 
 aiy_board=imp('aiy.board')
 
