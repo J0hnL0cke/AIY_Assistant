@@ -32,7 +32,7 @@ class speak:
             if not len(build)==0:
                 build+=' '
             build+=str(text)
-        print('Speaking', build)
+        print('Speaking "'+build+'"')
         cls.engine.say(build)
         cls.engine.runAndWait()
 
