@@ -325,12 +325,15 @@ class music:
                 song_id=meta["id"]
                 song_url = meta["url"]
                 song_title= meta["title"]
+                print("Found song:", song_title)
                 
                 title=cls._get_title_from_id(song_id)
                 
                 if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
                     #Song exists but is not saved locally
+                    print("Song not downloaded, downloading...")
                     cls.download_music(song_url,song_id)
+                    print("Finished downloading.")
                     #Index title
                     title=song_title
                     cls.song_ids[song_id]=song_title
@@ -344,6 +347,7 @@ class music:
             title=cls._get_title_from_id(song_id)
             
         if can_play:
+            print("Playing song...")
             cls.playing=True
             cls.has_music=True
             build_song=' '.join(['Playing', cls.cleanup_title(title)])
