@@ -400,7 +400,7 @@ class music:
         #download with output as the id
         try:
             with youtube_dl.YoutubeDL(opts) as ydl:
-                ydl.download(url)
+                ydl.download([url])
         except:
           print("Error downloading song:", sys.exc_info()[0])
         
