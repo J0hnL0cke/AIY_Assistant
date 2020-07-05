@@ -305,7 +305,7 @@ class music:
         song_id=cls._get_id_from_term(search_term)
         
         if song_id is None:
-            tab("Searching Youtube...")
+            tab("Not sure what song you meant. Searching Youtube...")
             #Song isn't indexed, search YT
             try:
                 with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
@@ -345,6 +345,7 @@ class music:
                 
         else:
             title=cls._get_title_from_id(song_id)
+            print("Found song:", title)
             
         if can_play:
             print("Playing song...")
