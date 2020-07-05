@@ -325,7 +325,7 @@ class music:
                     #Song doesn't exist
                     can_play=False
                     
-                else if not keyboard_int:
+                else:
                     meta=meta['entries'][0]
                     #Song exists but search term not known
                     song_id=meta["id"]
