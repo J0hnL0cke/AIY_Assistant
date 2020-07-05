@@ -168,7 +168,7 @@ class files:
                     except ValueError:
                         pass
         except IOError:
-            cls._nofile(file, not_found, use_default, use_default)
+            cls._nofile(file, not_found, use_default)
             contents=not_found
         if len(contents)==1:
             contents=contents[0]
