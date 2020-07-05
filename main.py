@@ -321,6 +321,7 @@ class music:
                 
             else:
                 #Song exists but search term not known
+                files.write_file(test,str(meta))
                 song_id=meta.get("id", None)
                 song_url = meta.get("url", None)
                 song_title= meta.get("title", None)
