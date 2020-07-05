@@ -263,7 +263,7 @@ class music:
         cls.ydl_opts={
             'default_search': 'ytsearch1:',
             'format': 'bestaudio/best',
-            'yesplaylist': True,
+            'noplaylist': True,
             'quiet': False, #Quiet is false, should show info when loading songs
             'ignore-errors': True,
             'restrict-filenames': True,
@@ -394,7 +394,7 @@ class music:
             cls._save_dicts()
         
     @classmethod
-    def download_music(cls, url,song_name):
+    def download_music(cls, url, song_name):
         opts=cls.ydl_opts
         opts['outtmpl']='music/{0}.%(ext)s'.format(song_name)
         #download with output as the id
