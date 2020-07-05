@@ -877,11 +877,9 @@ import importlib
 #Location of modules used in the project
 package_path="./packages"
 
-#Change working dir
+#Used for checking if a file exists
 os=imp('os')
-path=os.path
 
-#os.chdir(package_path)
 print("Current dir is", os.getcwd())
 
 leds=imp('aiy.leds')
