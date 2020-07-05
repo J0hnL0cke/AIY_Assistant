@@ -342,10 +342,14 @@ class music:
                 cls._save_dicts()
                 
         if can_play:
+            cls.playing=True
+            cls.has_music=True
+            build_song=' '.join(['Playing', cls.cleanup_title(song_title)])
+            print(build_song)
+            cls.last_song=(song_title)
+            speak.say(build_song)
             try:
                 cls._play_from_file(song_id)
-                cls.playing=True
-                cls.has_music=True
                 cls.vlc_player.play()
             except:
                 print(sys.exc_info()[0])
@@ -374,55 +378,6 @@ class music:
     def _load_dicts(cls):
         cls.song_ids=ast.literal_eval(files.read_file('song_ids',"{}"))
         cls.song_terms=ast.literal_eval(files.read_file('song_terms',"{}")
-        
-    #Delete:
-        #check todos
-        #info=meta['entries'][0]
-        #song_title=str(info['title'])
-
-        cls.song_terms
-        cls.song_ids
-        
-        #'outtmpl': 'music/%(title)s.%(ext)s'
-        
-        
-        else:
-            #search YT
-            try:
-                search_online=True
-                with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
-                    meta=ydl.extract_info(name, download=False)
-                    
-            except Exception:
-                found=False
-                print("Can't find", name)
-                speak.say("Sorry, I can't find that song.")
-                
-            #Now that the song title is found, check if it is downloaded
-            
-        print('Loading the song')
-        
-        if found:
-            if search_online:
-                #Found on YT
-                speak.say('Please wait while the song loads.')
-                
-                if cls.save_files:
-                    cls._play_from_file(cls.download_music(name))
-                    
-                else:
-                    cls._stream_music(meta)
-                    
-            else:
-                #File is saved locally
-                cls._play_from_file(res)
-                
-            
-            build_song=' '.join(['Playing', cls.cleanup_title(song_title)])
-            print(build_song)
-            cls.last_song=(song_title)
-            speak.say(build_song)
-            cls.vlc_player.play()
         
     @classmethod
     def download_music(cls, url):
@@ -957,9 +912,10 @@ del audio
 
 #Import for playing songs:
 vlc=imp('vlc')
-youtube_dl=imp('youtube_dl')
 string=imp("string")
 sys=imp('sys')
+ast=imp('ast')
+youtube_dl=imp('youtube_dl')
 #logging.basicConfig(
 #    level=logging.INFO,
 #    format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
