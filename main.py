@@ -360,7 +360,7 @@ class music:
         
     @classmethod
     def _get_id_from_term(cls, term):
-        return cls.song_terms.get(name)
+        return cls.song_terms.get(term)
         
     @classmethod
     def _get_title_from_id(cls, song_id):
