@@ -215,9 +215,6 @@ class files:
         else:
             loc=""
         return os.path.isdir(loc+name)
-        
-os.path.isfile()
-os.path.isdir()
 
 class volume:
     @classmethod
@@ -910,7 +907,7 @@ del audio
 
 #Import for playing songs:
 vlc=imp('vlc')
-string=imp("string")
+string=imp('string')
 sys=imp('sys')
 ast=imp('ast')
 youtube_dl=imp('youtube_dl')
