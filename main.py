@@ -252,7 +252,8 @@ class music:
     
     #Save files to the ./music/ directory to enable faster playback. Set to false to disable saving.
     save_files=True
-    
+    #Convert files that are saved to mp3 format. Does nothing if file saving is disabled.
+    convert_to_mp3=True
     
     @classmethod
     def init(cls):
@@ -269,7 +270,7 @@ class music:
             'restrict-filenames': True,
         }
         
-        if cls.save_files:
+        if cls.save_files and cls.convert_to_mp3:
             #This section saves the file as an .mp3.
             cls.ydl_saving={'audio-format': 'mp3',
                 'postprocessors': [{
@@ -331,12 +332,17 @@ class music:
                 
                 if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
                     #Song exists but is not saved locally
-                    print("Song not downloaded, downloading...")
-                    cls.download_music(song_url,song_id)
-                    print("Finished downloading.")
-                    #Index title
-                    title=song_title
-                    cls.song_ids[song_id]=song_title
+                    if cls.save_files:
+                        print("Song not downloaded, downloading...")
+                        cls.download_music(song_url,song_id)
+                        print("Finished downloading.")
+                        #Index title
+                        title=song_title
+                        cls.song_ids[song_id]=song_title
+                    else:
+                        print("Song not downloaded. Save_files is set to False.")
+                        print("Streaming song...")
+                        cls._stream_music(song_url)
                 
                 #Index the search term
                 cls.song_terms[search_term]=song_id
