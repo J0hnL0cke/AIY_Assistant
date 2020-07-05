@@ -342,7 +342,7 @@ class music:
                             speak.say("Downloading "+cls.cleanup_title(song_title))
                             try:
                                 cls.download_music(song_url,song_id)
-                            except KeyboardInterruption:
+                            except KeyboardInterrupt:
                                 raise
                             print("Finished downloading.")
                             #Index title
@@ -388,8 +388,8 @@ class music:
                 print("Can't find", name)
                 speak.say("Sorry, I can't find", search_term)
                 
-        except KeyboardInterruption:
-            print("Keyboard interruption detected, song operation canceled.")
+        except KeyboardInterrupt:
+            print("Keyboard interrupt detected, song operation canceled.")
         
     @classmethod
     def _get_id_from_term(cls, term):
@@ -429,7 +429,7 @@ class music:
         try:
             with youtube_dl.YoutubeDL(opts) as ydl:
                 ydl.download([url])
-        except KeyboardInterruption:
+        except KeyboardInterrupt:
             raise
         except:
           print("Error downloading song:", sys.exc_info()[0])
@@ -971,7 +971,7 @@ if __name__=='__main__':
         print('Done initalizing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
-        print("\nKeyboard interruption detected")
+        print("\nKeyboard interrupt detected")
     except:
         print("Unexpected error")
         raise
