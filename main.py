@@ -332,7 +332,7 @@ class music:
                     cls.download_music(song_url)
                     #Index title
                     title=song_title
-                    cls.song_ids[id]=song_title
+                    cls.song_ids[song_id]=song_title
                 
                 #Index the search term
                 cls.song_terms[search_term]=song_id
