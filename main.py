@@ -320,7 +320,7 @@ class music:
                 can_play=False
                 
             else:
-                meta=ast.literal_eval(meta)['entries'][0]
+                meta=meta['entries'][0]
                 #Song exists but search term not known
                 song_id=meta["id"]
                 song_url = meta["url"]
