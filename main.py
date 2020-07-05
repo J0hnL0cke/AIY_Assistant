@@ -320,6 +320,7 @@ class music:
                 can_play=False
                 
             else:
+                meta=['entries'][0]
                 #Song exists but search term not known
                 files.write_file(test,str(meta))
                 song_id=meta.get("id", None)
