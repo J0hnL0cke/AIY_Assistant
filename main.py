@@ -301,95 +301,94 @@ class music:
     
     @classmethod
     def find_music(cls,search_term):
-        can_play=True
-        keyboard_int=False
-        print("Searching for song...")
-        song_id=cls._get_id_from_term(search_term)
-        
-        if song_id is None:
-            tab("Not sure what song you meant. Searching Youtube...")
-            speak.say("Searching for "+search_term)
-            #Song isn't indexed, search YT
-            try:
-                with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
-                    meta=ydl.extract_info(search_term, download=False)
+        try:
+            can_play=True
+            print("Searching for song...")
+            song_id=cls._get_id_from_term(search_term)
+            
+            if song_id is None:
+                tab("Not sure what song you meant. Searching Youtube...")
+                speak.say("Searching for "+search_term)
+                #Song isn't indexed, search YT
+                try:
+                    with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
+                        meta=ydl.extract_info(search_term, download=False)
+                        
+                except KeyboardInterrupt:
+                    raise
                     
-            except KeyboardInterrupt:
-                keyboard_int=True
-                
-            except Exception:
-                #Error when song doesn't exist
-                meta=None
-                
-            if meta is None:
-                #Song doesn't exist
-                can_play=False
-                
-            else if not keyboard_int:
-                meta=meta['entries'][0]
-                #Song exists but search term not known
-                song_id=meta["id"]
-                song_url = meta["url"]
-                song_title= meta["title"]
-                print("Found song:", song_title)
-                
-                title=cls._get_title_from_id(song_id)
-                
-                if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
-                    #Song exists but is not saved locally
-                    if cls.save_files:
-                        print("Song not downloaded, downloading...")
-                        speak.say("Downloading "+cls.cleanup_title(song_title))
-                        try:
-                            cls.download_music(song_url,song_id)
+                except Exception:
+                    #Error when song doesn't exist
+                    meta=None
+                    
+                if meta is None:
+                    #Song doesn't exist
+                    can_play=False
+                    
+                else if not keyboard_int:
+                    meta=meta['entries'][0]
+                    #Song exists but search term not known
+                    song_id=meta["id"]
+                    song_url = meta["url"]
+                    song_title= meta["title"]
+                    print("Found song:", song_title)
+                    
+                    title=cls._get_title_from_id(song_id)
+                    
+                    if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
+                        #Song exists but is not saved locally
+                        if cls.save_files:
+                            print("Song not downloaded, downloading...")
+                            speak.say("Downloading "+cls.cleanup_title(song_title))
+                            try:
+                                cls.download_music(song_url,song_id)
+                            except KeyboardInterruption:
+                                raise
                             print("Finished downloading.")
                             #Index title
-                        title=song_title
-                        cls.song_ids[song_id]=song_title
-                        except KeyboardInterruption:
-                            keyboard_int=True
-                        
-                    else:
-                        print("Song not downloaded. Save_files is set to False.")
-                        print("Streaming song...")
-                        cls._stream_music(song_url)
-                
-                if not keyboard_int:
+                            title=song_title
+                            cls.song_ids[song_id]=song_title
+    
+                        else:
+                            print("Song not downloaded. Save_files is set to False.")
+                            print("Streaming song...")
+                            cls._stream_music(song_url)
+                    
                     #Index the search term
                     cls.song_terms[search_term]=song_id
                     #Save dicts to file
                     cls._save_dicts()
+                    
+            else:
+                title=cls._get_title_from_id(song_id)
+                print("Found song:", title)
                 
-        else:
-            title=cls._get_title_from_id(song_id)
-            print("Found song:", title)
-            
-        if can_play and not keyboard_int:
-            print("Playing song...")
-            cls.playing=True
-            cls.has_music=True
-            build_song=' '.join(['Playing', cls.cleanup_title(title)])
-            print(build_song)
-            cls.last_song=title
-            speak.say(build_song)
-            try:
-                cls._play_from_file(song_id)
-                cls.vlc_player.play()
-            
-            except KeyboardInterrupt:
-                keyboard_int=True
-            
-            except:
-                print(sys.exc_info()[0])
-                speak.say('Sorry, there was an error')
-                cls.has_music=False
-                cls.playing=False
-            
-        else if not keyboard_int:
-            print("Can't find", name)
-            speak.say("Sorry, I can't find", search_term)
-            
-        if keyboard_int:
+            if can_play:
+                print("Playing song...")
+                cls.playing=True
+                cls.has_music=True
+                build_song=' '.join(['Playing', cls.cleanup_title(title)])
+                print(build_song)
+                cls.last_song=title
+                speak.say(build_song)
+                try:
+                    cls._play_from_file(song_id)
+                    cls.vlc_player.play()
+                
+                except KeyboardInterrupt:
+                    raise
+                
+                except:
+                    print(sys.exc_info()[0])
+                    speak.say('Sorry, there was an error')
+                    cls.has_music=False
+                    cls.playing=False
+                
+            else:
+                print("Can't find", name)
+                speak.say("Sorry, I can't find", search_term)
+                
+        except KeyboardInterruption:
             print("Keyboard interruption detected, song operation canceled.")
         
     @classmethod
@@ -430,6 +429,8 @@ class music:
         try:
             with youtube_dl.YoutubeDL(opts) as ydl:
                 ydl.download([url])
+        except KeyboardInterruption:
+            raise
         except:
           print("Error downloading song:", sys.exc_info()[0])
         
