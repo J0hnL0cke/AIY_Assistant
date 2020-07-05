@@ -343,7 +343,7 @@ class music:
             cls.has_music=True
             build_song=' '.join(['Playing', cls.cleanup_title(song_title)])
             print(build_song)
-            cls.last_song=(song_title)
+            cls.last_song=song_title
             speak.say(build_song)
             try:
                 cls._play_from_file(song_id)
@@ -417,7 +417,7 @@ class music:
         next_song=files.playlist[cls.playlist_item]
         print('Next song is', next_song)
         time.sleep(2)
-        cls.play_music(next_song)
+        cls.find_music(next_song)
     
     @classmethod
     def _song_finished(cls, data):
@@ -741,7 +741,7 @@ class main_thread:
                     speak.say('You have not played a song recently')
                 else:
                     speak.say('Replaying the song')
-                    play_music(last_song)
+                    find_music(last_song)
                 
             else:
                 print('No song is currently playing.')
@@ -753,7 +753,7 @@ class main_thread:
             else:
                 print('Cannot play playlists yet!')
                 #TODO
-                music.play_music(random.choice(files.playlist))
+                music.find_music(random.choice(files.playlist))
         
         elif text=='pause' or text=='stop':
             if music.has_music==True and music.playing==True:
@@ -783,7 +783,7 @@ class main_thread:
             else:
                 music.has_music=False
                 music.playing=False
-                music.play_music(text.replace('play ', '', 1))
+                music.find_music(text.replace('play ', '', 1))
         
         elif cls.starts(text, 'volume'):
             if text=='volume':
