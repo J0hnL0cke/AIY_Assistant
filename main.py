@@ -886,6 +886,7 @@ lights.init()
 
 tts=imp('pyttsx3')
 sr=imp('speech_recognition')
+path=imp('path')
 argparse=imp('argparse')
 time=imp('time')
 random=imp('random')
