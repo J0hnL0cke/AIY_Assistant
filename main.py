@@ -368,8 +368,8 @@ class music:
         
     @classmethod
     def _save_dicts(cls):
-        files.write_file('song_ids',cls.song_ids)
-        files.write_file('song_terms',cls.song_terms)
+        files.write_file('song_ids',str(cls.song_ids))
+        files.write_file('song_terms',str(cls.song_terms))
         
     @classmethod
     def _load_dicts(cls):
