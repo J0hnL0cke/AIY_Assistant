@@ -133,21 +133,33 @@ class files:
         tab('Location is '+cls.location, 2)
     
     @classmethod
-    def _nofile(cls, file, contents):
-        print('Data file', cls.data_loc+file+'.txt', 'missing, creating...')
-        cls.write_file(file, contents)
+    def _nofile(cls, file, contents, use_default=True):
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
+        print('Data file', loc+file+'.txt', 'missing, creating...')
+        cls.write_file(file, contents, use_default)
     
     @classmethod
-    def write_file(cls, file, info):
-        with open(cls.data_loc+file+'.txt', "w+") as data:
+    def write_file(cls, file, info, use_default=True):
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
+        with open(loc+file+'.txt', "w+") as data:
             data.write(info)
-            print('Wrote "'+str(info)+'" to', file+'.txt')
+            print('Wrote "'+str(info)+'" to', loc+file+'.txt')
     
     @classmethod
-    def load_file(cls, file, not_found=''):
+    def load_file(cls, file, not_found='', use_default=True):
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
         try:
             contents=[]
-            with open(cls.data_loc+file+'.txt') as data:
+            with open(loc+file+'.txt') as data:
                 for each_line in data:
                     try:
                         line=each_line.strip()
@@ -156,20 +168,56 @@ class files:
                     except ValueError:
                         pass
         except IOError:
-            cls._nofile(file, not_found)
+            cls._nofile(file, not_found, use_default, use_default)
             contents=not_found
         if len(contents)==1:
             contents=contents[0]
         return contents
     
     @classmethod
-    def append_file(cls, file, info):
+    def append_file(cls, file, info, use_default=True):
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
         try:
-            with open(cls.data_loc+file+'.txt', "a") as data:
+            with open(loc+file+'.txt', "a") as data:
                 data.write('\n'+str(info))
-                print('Appended "'+str(info)+'" to', file+'.txt')
+                print('Appended "'+str(info)+'" to', loc+file+'.txt')
         except IOError:
-            cls._nofile(file, info)
+            cls._nofile(file, info, use_default)
+
+    @classmethod
+    def item_exists(cls, name, use_default=True):
+        #returns true if a file or directory with the given name exists
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
+        return os.path.exists(loc+name)
+        
+    @classmethod
+    def file_exists(cls, name, use_default=True):
+        if not cls.item_exists(name, use_default):
+            return False
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
+        return os.path.isfile(loc+name)
+        
+    @classmethod
+    def dir_exists(cls, name, use_default=True):
+        if not cls.item_exists(name, use_default):
+            return False
+        if use_default:
+            loc=cls.data_loc
+        else:
+            loc=""
+        return os.path.isdir(loc+name)
+        
+os.path.isfile()
+os.path.isdir()
 
 class volume:
     @classmethod
@@ -232,7 +280,6 @@ class music:
                     'preferredcodec': 'mp3',
                     'preferredquality': '192',
                 }],
-                'outtmpl': 'music/%(title)s.%(ext)s'
             }
             cls.ydl_opts.update(cls.ydl_saving)
         
@@ -240,7 +287,8 @@ class music:
         #Prevents it from saying words like "opening parenthesis"
         cls.title_chars=list(string.ascii_letters)+list(range(0,9))+[' ']
         
-        #TODO: Need to initialize youtube-dl
+        cls._load_dicts()
+        
         tab('Loading VLC...', 2)
         cls.vlc_instance=vlc.get_default_instance()
         
@@ -254,53 +302,156 @@ class music:
         cls.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, cls._song_finished, 1)
     
     @classmethod
-    def play_music(cls, name):
-        print('Loading the song')
-        speak.say('Please wait while the song loads.')
-        meta=[]
-        try:
-            with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
-                print("ydl loaded")
-                meta=ydl.extract_info(name, download=cls.save_files)
-        except Exception:
+    def find_music(cls,search_term):
+        can_play=True
+        print("Searching for song...")
+        song_id=cls._get_id_from_term(search_term)
+        
+        if song_id is None:
+            tab("Searching Youtube...")
+            #Song isn't indexed, search YT
+            try:
+                with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
+                    meta=ydl.extract_info(search_term, download=False)
+                    
+            except Exception:
+                #Error when song doesn't exist
+                meta=None
+                
+            if meta is None:
+                #Song doesn't exist
+                can_play=False
+                
+            else:
+                #Song exists but search term not known
+                song_id=meta.get("id", None)
+                song_url = meta.get("url", None)
+                song_title= meta.get("title", None)
+                
+                title=_get_title_from_id(song_id)
+                
+                if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
+                    #Song exists but is not saved locally
+                    cls.download_music(song_url)
+                    #Index title
+                    cls.song_ids[id]=song_title
+                
+                #Index the search term
+                cls.song_terms[search_term]=song_id
+                #Save dicts to file
+                cls._save_dicts()
+                
+        if can_play:
+            try:
+                cls._play_from_file(song_id)
+                cls.playing=True
+                cls.has_music=True
+                cls.vlc_player.play()
+            except:
+                print(sys.exc_info()[0])
+                speak.say('Sorry, there was an error')
+                cls.has_music=False
+                cls.playing=False
+                
+        else:
             print("Can't find", name)
             speak.say("Sorry, I can't find that song.")
         
+    @classmethod
+    def _get_id_from_term(cls, term):
+        return cls.song_terms.get(name)
         
-        cls.has_music=True
-        cls.playing=True
+    @classmethod
+    def _get_title_from_id(cls, song_id):
+        return cls.song_terms.get(song_id)
         
-        if meta!=[]:
-            info=meta['entries'][0]
-            song_title=str(info['title'])
+    @classmethod
+    def _save_dicts(cls):
+        files.write_file('song_ids',cls.song_ids)
+        files.write_file('song_terms',cls.song_terms)
+        
+    @classmethod
+    def _load_dicts(cls):
+        cls.song_ids=ast.literal_eval(files.read_file('song_ids',"{}"))
+        cls.song_terms=ast.literal_eval(files.read_file('song_terms',"{}")
+        
+    #Delete:
+        #check todos
+        #info=meta['entries'][0]
+        #song_title=str(info['title'])
+
+        cls.song_terms
+        cls.song_ids
+        
+        #'outtmpl': 'music/%(title)s.%(ext)s'
+        
+        
+        else:
+            #search YT
+            try:
+                search_online=True
+                with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
+                    meta=ydl.extract_info(name, download=False)
+                    
+            except Exception:
+                found=False
+                print("Can't find", name)
+                speak.say("Sorry, I can't find that song.")
+                
+            #Now that the song title is found, check if it is downloaded
+            
+        print('Loading the song')
+        
+        if found:
+            if search_online:
+                #Found on YT
+                speak.say('Please wait while the song loads.')
+                
+                if cls.save_files:
+                    cls._play_from_file(cls.download_music(name))
+                    
+                else:
+                    cls._stream_music(meta)
+                    
+            else:
+                #File is saved locally
+                cls._play_from_file(res)
+                
+            
             build_song=' '.join(['Playing', cls.cleanup_title(song_title)])
             print(build_song)
-        
-        try:
-            
-            if cls.save_files:
-                loc=ydl.prepare_filename(meta)
-            else:
-                loc=info['url']
-                
-            cls.vlc_player.set_media(cls.vlc_instance.media_new(loc))
             cls.last_song=(song_title)
             speak.say(build_song)
             cls.vlc_player.play()
-                
+        
+    @classmethod
+    def download_music(cls, url):
+        #download with output as the id
+        opts=cls.ydl_opts
+        opts['outtmpl']='music/%(title)s.%(ext)s'
+        try:
+            with youtube_dl.YoutubeDL(opts) as ydl:
+                ydl.download(name)
         except:
-            print(sys.exc_info()[0])
-            speak.say('Sorry, there was an error')
-            cls.has_music=False
-            cls.playing=False
+          print("Error downloading song:", sys.exc_info()[0])
+        
+    @classmethod
+    def _stream_music(cls, url):
+        #todo: implement this
+        cls.vlc_player.set_media(cls.vlc_instance.media_new(url))
     
+    @classmethod
+    def _play_from_file(cls, music_file):
+        #todo: check if this works
+        cls.vlc_player.set_media(cls.vlc_instance.media_new("music/"+music_file+".mp3"))
+        
     @classmethod
     def cleanup_title(cls,title):
         build=''
         for character in title:
             if character in cls.title_chars:
                 build+=character
-        return build.replace("  "," ").replace(" ","_")
+        return build.replace("  "," ")
     
     @classmethod
     def play_multiple(cls, reset=False):
@@ -655,12 +806,12 @@ class main_thread:
         elif text=='pause' or text=='stop':
             if music.has_music==True and music.playing==True:
                 #no need to pause because song is already paused
-                cls.music.playing=False
+                music.playing=False
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':
             if music.has_music==True and music.playing==False:
-                cls.music.playing=True
+                music.playing=True
                 speak.say('Okay')
         
         #Here, recognition of the string based on text.startswith('x') is allowed.
@@ -803,8 +954,6 @@ del audio
 
 #logging=imp('logging')
 #TODO: Is this necessary?
-
-#TODO: need to install ytdl and vlc
 
 #Import for playing songs:
 vlc=imp('vlc')
