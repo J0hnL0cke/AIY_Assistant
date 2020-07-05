@@ -531,7 +531,7 @@ class recognize:
     @classmethod
     def parse_audio(cls,fname):
         # obtain path to the given file in the same folder as this script
-        AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), fname)
+        AUDIO_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), fname)
         
         # use the audio file as the audio source
         #Create a new recognizer instance
@@ -870,9 +870,6 @@ print("Importing packages...")
 imp('importlib',real=False)
 #Actually imports it
 import importlib
-
-#Location of modules used in the project
-package_path="./packages"
 
 #Used for checking if a file exists
 os=imp('os')
