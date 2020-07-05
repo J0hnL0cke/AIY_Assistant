@@ -335,7 +335,7 @@ class music:
                     #Song exists but is not saved locally
                     if cls.save_files:
                         print("Song not downloaded, downloading...")
-                        speak.say("Downloading "+cls.cleanup_title(song_title)
+                        speak.say("Downloading "+cls.cleanup_title(song_title))
                         cls.download_music(song_url,song_id)
                         print("Finished downloading.")
                         #Index title
