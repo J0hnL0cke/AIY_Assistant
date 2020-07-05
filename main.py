@@ -381,12 +381,12 @@ class music:
         
     @classmethod
     def download_music(cls, url):
-        #download with output as the id
         opts=cls.ydl_opts
-        opts['outtmpl']='music/%(title)s.%(ext)s'
+        opts['outtmpl']='music/%(id)s.%(ext)s'
+        #download with output as the id
         try:
             with youtube_dl.YoutubeDL(opts) as ydl:
-                ydl.download(name)
+                ydl.download(url)
         except:
           print("Error downloading song:", sys.exc_info()[0])
         
