@@ -330,7 +330,7 @@ class music:
                 
                 if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
                     #Song exists but is not saved locally
-                    cls.download_music(song_url)
+                    cls.download_music(song_url,song_id)
                     #Index title
                     title=song_title
                     cls.song_ids[song_id]=song_title
@@ -394,9 +394,9 @@ class music:
             cls._save_dicts()
         
     @classmethod
-    def download_music(cls, url):
+    def download_music(cls, url,song_name):
         opts=cls.ydl_opts
-        opts['outtmpl']='music/%(id)s.%(ext)s'
+        opts['outtmpl']='music/{0}.%(ext)s'.format(song_name)
         #download with output as the id
         try:
             with youtube_dl.YoutubeDL(opts) as ydl:
