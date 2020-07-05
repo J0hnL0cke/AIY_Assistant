@@ -307,6 +307,7 @@ class music:
         
         if song_id is None:
             tab("Not sure what song you meant. Searching Youtube...")
+            speak.say("Searching for "+search_term)
             #Song isn't indexed, search YT
             try:
                 with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
@@ -334,6 +335,7 @@ class music:
                     #Song exists but is not saved locally
                     if cls.save_files:
                         print("Song not downloaded, downloading...")
+                        speak.say("Downloading "+cls.cleanup_title(song_title)
                         cls.download_music(song_url,song_id)
                         print("Finished downloading.")
                         #Index title
