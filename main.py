@@ -332,19 +332,22 @@ class music:
                     cls.download_music(song_url)
                     #Index title
                     title=song_title
-                    cls.song_ids[id]=title
+                    cls.song_ids[id]=song_title
                 
                 #Index the search term
                 cls.song_terms[search_term]=song_id
                 #Save dicts to file
                 cls._save_dicts()
                 
+        else:
+            title=cls._get_title_from_id(song_id)
+            
         if can_play:
             cls.playing=True
             cls.has_music=True
-            build_song=' '.join(['Playing', cls.cleanup_title(song_title)])
+            build_song=' '.join(['Playing', cls.cleanup_title(title)])
             print(build_song)
-            cls.last_song=song_title
+            cls.last_song=title
             speak.say(build_song)
             try:
                 cls._play_from_file(song_id)
