@@ -325,7 +325,7 @@ class music:
                 song_url = meta.get("url", None)
                 song_title= meta.get("title", None)
                 
-                title=_get_title_from_id(song_id)
+                title=cls._get_title_from_id(song_id)
                 
                 if title is None or not cls.file_exists('music/'+song_url+'.mp3'):
                     #Song exists but is not saved locally
