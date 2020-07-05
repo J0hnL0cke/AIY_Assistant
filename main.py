@@ -377,7 +377,7 @@ class music:
     @classmethod
     def _load_dicts(cls):
         cls.song_ids=ast.literal_eval(files.read_file('song_ids',"{}"))
-        cls.song_terms=ast.literal_eval(files.read_file('song_terms',"{}")
+        cls.song_terms=ast.literal_eval(files.read_file('song_terms',"{}"))
         
     @classmethod
     def download_music(cls, url):
