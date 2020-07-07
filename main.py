@@ -668,7 +668,7 @@ class main_thread:
         
         #Set class variables that will be used to recognize the intent of a speaker
         
-        cls.greeting=['good morining', 'hello', 'good afternoon', 'hi', 'hey', 'hey there', 'hi there', 'hello there']
+        cls.greeting=['good morning', 'hello', 'good afternoon', 'hi', 'hey', 'hey there', 'hi there', 'hello there']
         cls.replay=['replay', 'start over', 'restart the song', 'start the song over']
         cls.names=['one hundred', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
         cls.numbers=[100, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30, 40, 50, 60, 70, 80, 90]
