@@ -369,7 +369,7 @@ class music:
                 cls.has_music=True
                 build_song=' '.join(['Playing', cls.cleanup_title(title)])
                 print(build_song)
-                cls.last_song=title
+                cls.last_song=search_term
                 speak.say(build_song)
                 try:
                     cls._play_from_file(song_id)
