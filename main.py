@@ -33,8 +33,12 @@ class speak:
                 build+=' '
             build+=str(text)
         print('Speaking "'+build+'"')
-        cls.engine.say(build)
-        cls.engine.runAndWait()
+        try:
+            cls.engine.say(build)
+            cls.engine.runAndWait()
+        except KeyboardInterrupt:
+            cls.say("It was very rude of you to interrupt me like that. What was I saying?")
+            raise
 
 class lights:
     
