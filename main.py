@@ -361,7 +361,7 @@ class music:
                     
             else:
                 title=cls._get_title_from_id(song_id)
-                print("Found song:", song_id, title)
+                print("Found song:", title, "id:", song_id)
                 
             if can_play:
                 print("Playing song...")
