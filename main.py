@@ -467,7 +467,7 @@ class music:
         cls.find_music(next_song)
     
     @classmethod
-    def _song_finished(cls, data):
+    def _song_finished(cls, *args, **kwargs):
         print('Song over')
         print('Playlist:', cls.is_playlist)
         if cls.is_playlist==True:
