@@ -335,7 +335,7 @@ class music:
                     
                     title=cls._get_title_from_id(song_id)
                     
-                    if title is None or not cls.file_exists('music/'+song_id+'.mp3'):
+                    if title is None or not files.file_exists('music/'+song_id+'.mp3'):
                         #Song exists but is not saved locally
                         if cls.save_files:
                             print("Song not downloaded, downloading...")
