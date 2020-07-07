@@ -37,7 +37,7 @@ If you get an error installing with pip3, then try running the commands using pi
 
 `sudo apt-get install espeak`
 
-`sudo -H pip install --upgrade youtube-dl`
+`sudo -H pip3 install --upgrade youtube-dl`
 
 `pip3 install pyaudio`
 
