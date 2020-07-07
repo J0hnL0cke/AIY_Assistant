@@ -768,7 +768,7 @@ class main_thread:
             lights.reset_led()
             subprocess.call('sudo reboot', shell=True)
             
-        elif text=='close program' or text=='stop program' or text=='stop recongizer' or text=='stop recognizer':
+        elif text=='close program' or text=='stop program' or text=='stop recongizer' or text=='stop recognizer' or text=='exit':
             speak.say('Goodbye for now.')
             print("Closing program...")
             cls.keep_running=False
