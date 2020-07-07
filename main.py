@@ -803,7 +803,7 @@ class main_thread:
                     speak.say('You have not played a song recently')
                 else:
                     speak.say('Replaying the song')
-                    music.find_music(last_song)
+                    music.find_music(music.last_song)
                 
             else:
                 print('No song is currently playing.')
