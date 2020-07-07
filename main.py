@@ -219,26 +219,26 @@ class volume:
     def init(cls):
         tab('Loading volume...')
         tab('Getting current volume...', 2)
-        cls.volume=cls._get()
+        cls.volume=cls._get_volume()
         tab('Volume is set to '+str(cls.volume))
     
     @classmethod
     def change(cls, vol):
         subprocess.call('amixer -q set Master %d%%' % vol, shell=True)
-        speak.say('Volume at'+str(vol))
-        print('Volume set to', vol)
+        speak.say('Volume set to', str(vol))
+        print('Volume: ', vol)
         cls.volume=vol
     
     @classmethod
-    def _get(cls):
+    def _get_volume(cls):
         #res=subprocess.check_output(r'amixer get Master | grep "Front Left:" | sed "s/.*\[\([0-9]\+\)%\].*/\1/"', shell=True).strip()
         res=5
         return int(res)
     
     @classmethod
-    def move(ammount):
+    def move(cls, amount):
         #raise or lower the volume by the given ammount
-        cls.change(cls.volume+ammount)
+        cls.change(cls.volume+amount)
 
 class music:
     
@@ -668,8 +668,8 @@ class main_thread:
         
         cls.greeting=['good morning', 'hello', 'good afternoon', 'hi', 'hey', 'hey there', 'hi there', 'hello there']
         cls.replay=['replay', 'start over', 'restart the song', 'start the song over']
-        cls.names=['one hundred', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
-        cls.numbers=[100, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 30, 40, 50, 60, 70, 80, 90]
+        cls.names=['one hundred', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'teen', 'thirty', 'fourty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+        cls.numbers=[100, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 10, 30, 40, 50, 60, 70, 80, 90, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         cls.current_weather=['sunny', 'cloudy', 'stormy', 'foggy', 'snowing', 'sleeting', 'hailing', 'windy', 'humid']
         cls.future_weather=['rain', 'thunder and lightning', 'clouds', 'increased humidity', 'high winds', 'fog', 'storms', 'hail', 'sleet', 'tornado', 'snow', 'solar flare', 'tsunami', 'zombie apocalypse', 'raining tacos', 'wildfire', 'avalanche', 'sand storms', 'drought']
         
@@ -845,19 +845,20 @@ class main_thread:
         
         elif cls.starts(text, 'volume'):
             if text=='volume':
-                speak.say('Volume is set to'+str(volume.volume))
+                speak.say('Volume is set to', str(volume.volume))
             else:
-                text=text.replace('volume ', '')
+                text=text.replace('volume ', '').replace('volume','') #In case the user says something like "volumes"
                 if text=='up':
-                    volume.move(+5)
+                    volume.move(+10)
                 elif text=='down':
-                    volume.move(-5)
+                    volume.move(-10)
                 else:
                     try:
+                        vol=text
                         for index, item in enumerate(cls.names):
-                            vol=vol.replace(item, cls.numbers[index])
+                            vol=vol.replace(item, str(cls.numbers[index]))
                         total=0
-                        for num in vol.split:
+                        for num in vol.split():
                             if num!='':
                                 total+=int(num)
                         vol=total
@@ -866,7 +867,8 @@ class main_thread:
                         else:
                             speak.say('Please give a number from one to one hundred.')
                     except:
-                        speak.say('You can say volume up or down or say volume followed by a number from one to one hundred.')
+                        print("Error:", sys.exc_info()[0])
+                        speak.say('You can say volume up, volume down, or volume followed by a number from one to one hundred.')
                     
         elif cls.starts(text, 'call me'):
             if text=='call me':
