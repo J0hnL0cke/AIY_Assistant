@@ -1,4 +1,8 @@
 /data/*
+/music/*
 *.pyc
 *.pmdl
 *.wav
+*.mp3
+*.part
+*.webm
