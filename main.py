@@ -32,7 +32,7 @@ class speak:
             if not len(build)==0:
                 build+=' '
             build+=str(text)
-        print('Speaking "'+build+'"')
+        print('Speaking', build)
         cls.engine.say(build)
         cls.engine.runAndWait()
 
@@ -133,33 +133,21 @@ class files:
         tab('Location is '+cls.location, 2)
     
     @classmethod
-    def _nofile(cls, file, contents, use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        print('Data file', loc+file+'.txt', 'missing, creating...')
-        cls.write_file(file, contents, use_default)
+    def _nofile(cls, file, contents):
+        print('Data file', cls.data_loc+file+'.txt', 'missing, creating...')
+        cls.write_file(file, contents)
     
     @classmethod
-    def write_file(cls, file, info, use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        with open(loc+file+'.txt', "w+") as data:
+    def write_file(cls, file, info):
+        with open(cls.data_loc+file+'.txt', "w+") as data:
             data.write(info)
-            print('Wrote "'+str(info)+'" to', loc+file+'.txt')
+            print('Wrote "'+str(info)+'" to', file+'.txt')
     
     @classmethod
-    def load_file(cls, file, not_found='', use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
+    def load_file(cls, file, not_found=''):
         try:
             contents=[]
-            with open(loc+file+'.txt') as data:
+            with open(cls.data_loc+file+'.txt') as data:
                 for each_line in data:
                     try:
                         line=each_line.strip()
@@ -168,53 +156,20 @@ class files:
                     except ValueError:
                         pass
         except IOError:
-            cls._nofile(file, not_found, use_default)
+            cls._nofile(file, not_found)
             contents=not_found
         if len(contents)==1:
             contents=contents[0]
         return contents
     
     @classmethod
-    def append_file(cls, file, info, use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
+    def append_file(cls, file, info):
         try:
-            with open(loc+file+'.txt', "a") as data:
+            with open(cls.data_loc+file+'.txt', "a") as data:
                 data.write('\n'+str(info))
-                print('Appended "'+str(info)+'" to', loc+file+'.txt')
+                print('Appended "'+str(info)+'" to', file+'.txt')
         except IOError:
-            cls._nofile(file, info, use_default)
-
-    @classmethod
-    def item_exists(cls, name, use_default=True):
-        #returns true if a file or directory with the given name exists
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        return os.path.exists(loc+name)
-        
-    @classmethod
-    def file_exists(cls, name, use_default=True):
-        if not cls.item_exists(name, use_default):
-            return False
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        return os.path.isfile(loc+name)
-        
-    @classmethod
-    def dir_exists(cls, name, use_default=True):
-        if not cls.item_exists(name, use_default):
-            return False
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        return os.path.isdir(loc+name)
+            cls._nofile(file, info)
 
 class volume:
     @classmethod
@@ -249,208 +204,59 @@ class music:
     is_playlist=False
     last_song=''
     playlist_item=0
-    
-    #Save files to the ./music/ directory to enable faster playback. Set to false to disable saving.
-    save_files=True
-    #Convert files that are saved to mp3 format. Does nothing if file saving is disabled.
-    convert_to_mp3=True
+    ydl_opts={
+        'default_search': 'ytsearch1:',
+        'format': 'bestaudio/best',
+        'noplaylist': True,
+        'quiet': False #Quiet is false, should show info when loading songs
+    }
     
     @classmethod
     def init(cls):
         tab('Loading music...')
         
-        tab('Loading Youtube_DL', 2)
-        #Set Youtube DL options
-        cls.ydl_opts={
-            'default_search': 'ytsearch1:',
-            'format': 'bestaudio/best',
-            'noplaylist': True,
-            'quiet': False, #Quiet is false, should show info when loading songs
-            'ignore-errors': True,
-            'restrict-filenames': True,
-        }
-        
-        if cls.save_files and cls.convert_to_mp3:
-            #This section saves the file as an .mp3.
-            cls.ydl_saving={'audio-format': 'mp3',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }],
-            }
-            cls.ydl_opts.update(cls.ydl_saving)
-        
-        #Make a list of characters that can be said by the tts program
-        #Prevents it from saying words like "opening parenthesis"
-        cls.title_chars=list(string.ascii_letters)+list(range(0,9))+[' ']
-        
-        cls._load_dicts()
-        
+        #TODO: Need to initialize youtube-dl
         tab('Loading VLC...', 2)
-        cls.vlc_instance=vlc.get_default_instance()
-        
+        #TODO
+        #cls.vlc_instance=vlc.get_default_instance()
         #create a playlist?
         #cls.vlc_playlist=cls.vlc.media_list_new()
+        
         #cls.vlc_player=cls.vlc_instance.media_list_player_new()
+        #cls.vlc_player=cls.vlc_instance.media_player_new()
         
-        cls.vlc_player=cls.vlc_instance.media_player_new()
-        
-        cls.vlc_event_manager=cls.vlc_player.event_manager()
-        cls.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, cls._song_finished, 1)
+        #cls.vlc_event_manager=cls.vlc_player.event_manager()
+        #cls.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, cls._song_finished, 1)
     
     @classmethod
-    def find_music(cls,search_term):
+    def play_music(cls, name):
+        print('Loading the song')
+        speak.say('Please wait while the song loads.')
+        meta=[]
         try:
-            can_play=True
-            print("Searching for song...")
-            song_id=cls._get_id_from_term(search_term)
-            
-            if song_id is None:
-                tab("Not sure what song you meant. Searching Youtube...")
-                speak.say("Searching for "+search_term)
-                #Song isn't indexed, search YT
-                try:
-                    with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
-                        meta=ydl.extract_info(search_term, download=False)
-                        
-                except KeyboardInterrupt:
-                    raise
-                    
-                except Exception:
-                    #Error when song doesn't exist
-                    meta=None
-                    
-                if meta is None:
-                    #Song doesn't exist
-                    can_play=False
-                    
-                else:
-                    meta=meta['entries'][0]
-                    #Song exists but search term not known
-                    song_id=meta["id"]
-                    song_url = meta["url"]
-                    song_title= meta["title"]
-                    print("Found song:", song_title)
-                    
-                    title=cls._get_title_from_id(song_id)
-                    
-                    if title is None or not cls.file_exists('music/'+song_id+'.mp3'):
-                        #Song exists but is not saved locally
-                        if cls.save_files:
-                            print("Song not downloaded, downloading...")
-                            speak.say("Downloading "+cls.cleanup_title(song_title))
-                            try:
-                                cls.download_music(song_url,song_id)
-                            except KeyboardInterrupt:
-                                raise
-                            print("Finished downloading.")
-                            #Index title
-                            title=song_title
-                            cls.song_ids[song_id]=song_title
-    
-                        else:
-                            print("Song not downloaded. Save_files is set to False.")
-                            print("Streaming song...")
-                            cls._stream_music(song_url)
-                    
-                    #Index the search term
-                    cls.song_terms[search_term]=song_id
-                    #Save dicts to file
-                    cls._save_dicts()
-                    
-            else:
-                title=cls._get_title_from_id(song_id)
-                print("Found song:", title)
-                
-            if can_play:
-                print("Playing song...")
-                cls.playing=True
-                cls.has_music=True
-                build_song=' '.join(['Playing', cls.cleanup_title(title)])
-                print(build_song)
-                cls.last_song=title
+            with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
+                meta=ydl.extract_info(name, download=False)
+        except Exception:
+            print("Can't find", name)
+            speak.say("Sorry, I can't find that song.")
+        
+        if meta!=[]:
+            cls.has_music=True
+            cls.music_playing=True
+            info=meta['entries'][0]
+            song_title=str(info['title'])
+            cleanup_title=song_title.replace('-', ',').replace(' ,', ',').replace('[', '').replace(']', '').replace("'", '').replace('"', '')
+            build_song=' '.join(['Playing', cleanup_title])
+            print(build_song)
+            try:
+                info=cls.vlc_instance.media_new(info['url'])
+                cls.vlc_player.set_media(info)
+                cls.last_song=(song_title)
                 speak.say(build_song)
-                try:
-                    cls._play_from_file(song_id)
-                    cls.vlc_player.play()
-                
-                except KeyboardInterrupt:
-                    raise
-                
-                except:
-                    print(sys.exc_info()[0])
-                    speak.say('Sorry, there was an error')
-                    cls.has_music=False
-                    cls.playing=False
-                
-            else:
-                print("Can't find", name)
-                speak.say("Sorry, I can't find", search_term)
-                
-        except KeyboardInterrupt:
-            print("Keyboard interrupt detected, song operation canceled.")
-        
-    @classmethod
-    def _get_id_from_term(cls, term):
-        return cls.song_terms.get(term)
-        
-    @classmethod
-    def _get_title_from_id(cls, song_id):
-        return cls.song_terms.get(song_id)
-        
-    @classmethod
-    def _save_dicts(cls):
-        files.write_file('song_ids',str(cls.song_ids))
-        files.write_file('song_terms',str(cls.song_terms))
-        
-    @classmethod
-    def _load_dicts(cls):
-        error=False
-        try:
-            cls.song_ids=ast.literal_eval(files.load_file('song_ids',"{}"))
-        except:
-            cls.song_ids={}
-            error=True
-        try:
-            cls.song_terms=ast.literal_eval(files.load_file('song_terms',"{}"))
-        except:
-            cls.song_terms={}
-            error=True
-            
-        if error:
-            cls._save_dicts()
-        
-    @classmethod
-    def download_music(cls, url, song_name):
-        opts=cls.ydl_opts
-        opts['outtmpl']='music/{0}.%(ext)s'.format(song_name)
-        #download with output as the id
-        try:
-            with youtube_dl.YoutubeDL(opts) as ydl:
-                ydl.download([url])
-        except KeyboardInterrupt:
-            raise
-        except:
-          print("Error downloading song:", sys.exc_info()[0])
-        
-    @classmethod
-    def _stream_music(cls, url):
-        #todo: implement this
-        cls.vlc_player.set_media(cls.vlc_instance.media_new(url))
-    
-    @classmethod
-    def _play_from_file(cls, music_file):
-        #todo: check if this works
-        cls.vlc_player.set_media(cls.vlc_instance.media_new("music/"+music_file+".mp3"))
-        
-    @classmethod
-    def cleanup_title(cls,title):
-        build=''
-        for character in title:
-            if character in cls.title_chars:
-                build+=character
-        return build.replace("  "," ")
+                cls.vlc_player.play()
+            except an_error:
+                print(an_error)
+                speak.say('Sorry, there was an error')
     
     @classmethod
     def play_multiple(cls, reset=False):
@@ -464,7 +270,7 @@ class music:
         next_song=files.playlist[cls.playlist_item]
         print('Next song is', next_song)
         time.sleep(2)
-        cls.find_music(next_song)
+        cls.play_music(next_song)
     
     @classmethod
     def _song_finished(cls, data):
@@ -578,7 +384,7 @@ class recognize:
     @classmethod
     def parse_audio(cls,fname):
         # obtain path to the given file in the same folder as this script
-        AUDIO_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), fname)
+        AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), fname)
         
         # use the audio file as the audio source
         #Create a new recognizer instance
@@ -616,7 +422,7 @@ class hotword:
     def start(cls):
         cls.started=True
         print("Starting detector")
-        cls.detector = snowboy.HotwordDetector(files.load_file('path_to_voice_model', './model.pmdl'), sensitivity=0.4, audio_gain=1)
+        cls.detector = snowboy.HotwordDetector(files.load_file('path_to_voice_model', ''), sensitivity=0.4, audio_gain=1)
         try:
             cls.detector.start(cls.detected_callback)
         except:
@@ -788,7 +594,7 @@ class main_thread:
                     speak.say('You have not played a song recently')
                 else:
                     speak.say('Replaying the song')
-                    find_music(last_song)
+                    play_music(last_song)
                 
             else:
                 print('No song is currently playing.')
@@ -800,17 +606,17 @@ class main_thread:
             else:
                 print('Cannot play playlists yet!')
                 #TODO
-                music.find_music(random.choice(files.playlist))
+                music.play_music(random.choice(files.playlist))
         
         elif text=='pause' or text=='stop':
             if music.has_music==True and music.playing==True:
                 #no need to pause because song is already paused
-                music.playing=False
+                cls.music_playing=False
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':
             if music.has_music==True and music.playing==False:
-                music.playing=True
+                cls.music_playing=True
                 speak.say('Okay')
         
         #Here, recognition of the string based on text.startswith('x') is allowed.
@@ -829,8 +635,8 @@ class main_thread:
                     music.play_multiple(True)
             else:
                 music.has_music=False
-                music.playing=False
-                music.find_music(text.replace('play ', '', 1))
+                music.music_playing=False
+                music.play_music(text.replace('play ', '', 1))
         
         elif cls.starts(text, 'volume'):
             if text=='volume':
@@ -918,9 +724,14 @@ imp('importlib',real=False)
 #Actually imports it
 import importlib
 
-#Used for checking if a file exists
-os=imp('os')
+#Location of modules used in the project
+package_path="./packages"
 
+#Change working dir
+os=imp('os')
+path=os.path
+
+#os.chdir(package_path)
 print("Current dir is", os.getcwd())
 
 leds=imp('aiy.leds')
@@ -935,7 +746,7 @@ time=imp('time')
 random=imp('random')
 snowboy=imp('snowboy.snowboydecoder')
 threading=imp('threading')
-subprocess=imp('subprocess') #Used for checking IP address and changing/getting volume
+subprocess=imp('subprocess')#Used for checking IP address and changing/getting volume
 
 aiy_board=imp('aiy.board')
 
@@ -949,12 +760,11 @@ del audio
 #logging=imp('logging')
 #TODO: Is this necessary?
 
+#TODO: need to install ytdl and vlc
+
 #Import for playing songs:
-vlc=imp('vlc')
-string=imp('string')
-sys=imp('sys')
-ast=imp('ast')
-youtube_dl=imp('youtube_dl')
+#vlc=imp('vlc') (uncomment these after installing)
+#youtube_dl=imp('youtube_dl')
 #logging.basicConfig(
 #    level=logging.INFO,
 #    format="[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
@@ -971,7 +781,7 @@ if __name__=='__main__':
         print('Done initalizing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
-        print("\nKeyboard interrupt detected")
+        print("\nKeyboard interruption detected")
     except:
         print("Unexpected error")
         raise
