@@ -689,7 +689,18 @@ class main_thread:
         
         #Set initialized flag, allowing main.run() to be called without error
         cls.initialized=True
-    
+        
+        #If set to True, input is only accepted through
+        is_console_only=files.load_file("console_only","None")[0]
+        if is_console_only=="True":
+            cls.console_only=True
+            print("console_only set to True")
+        elif is_console_only=="False":
+            cls.console_only=False
+        else:
+            cls.console_only=False
+            files.write_file("console_only","False\n\nSet to True to disable hotword detection and only accept input through the command line")
+        
     @classmethod
     def run(cls):
         
@@ -704,23 +715,27 @@ class main_thread:
         while cls.keep_running:
             lights.status_change('ready')
             lights.button_change('green')
-            print('Press the button or say the hotword')
             
-            trigger.wait()
-            
-            if music.playing:
-                print('Pausing song for button press')
-                music.pause()
-            
-            lights.status_change('listening')
-            lights.button_change('yellow')
-            print('Listening...')
-            
-            text=recognize.main()
-            
-            print('You said "'+str(text)+'".')
-            lights.button_change('blue')
-            lights.status_change('thinking')
+            if cls.console_only:
+                text=input("Enter command: ")
+            else:
+                print('Press the button or say the hotword')
+                
+                trigger.wait()
+                
+                if music.playing:
+                    print('Pausing song for button press')
+                    music.pause()
+                
+                lights.status_change('listening')
+                lights.button_change('yellow')
+                print('Listening...')
+                
+                text=recognize.main()
+                
+                print('You said "'+str(text)+'".')
+                lights.button_change('blue')
+                lights.status_change('thinking')
             
             if len(str(text))==0:
                 #Nothing was heard
@@ -806,6 +821,8 @@ class main_thread:
             if music.has_music==True and music.playing==True:
                 #no need to pause because song is already paused
                 music.playing=False
+                if cls.console_only:
+                    music.pause(True)
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':
