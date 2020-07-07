@@ -62,8 +62,6 @@ class lights:
         tab('Initalizing status light...')
         #cls.status_ui=aiy.voicehat.get_status_ui()
         #TODO: keep or remove?
-        tab('Setting status...', 2)
-        cls.status_change('starting')
         tab('Initalizing leds...')
         cls._get_led_inst()
         tab('Setting LED...', 2)
@@ -72,7 +70,7 @@ class lights:
     @classmethod
     def status_change(cls, info):
         print('Status light=', info)
-        #cls.status_ui.status(info)
+        cls.status_ui.status(info)
     
     @classmethod
     def button_change(cls, c):
@@ -713,11 +711,11 @@ class main_thread:
         
         #separate function/class?
         while cls.keep_running:
-            lights.status_change('ready')
             lights.button_change('green')
             
             if cls.console_only:
                 text=input("Enter command: ")
+                lights.button_change('blue')
             else:
                 print('Press the button or say the hotword')
                 
@@ -727,7 +725,6 @@ class main_thread:
                     print('Pausing song for button press')
                     music.pause()
                 
-                lights.status_change('listening')
                 lights.button_change('yellow')
                 print('Listening...')
                 
@@ -735,7 +732,6 @@ class main_thread:
                 
                 print('You said "'+str(text)+'".')
                 lights.button_change('blue')
-                lights.status_change('thinking')
             
             if len(str(text))==0:
                 #Nothing was heard
@@ -757,8 +753,6 @@ class main_thread:
         #Interpret what the person said
         
         if text=='power off' or text=='shut down':
-            #assistant.stop_conversation()
-            lights.status_change('stopping')
             speak.say('Good bye!')
             lights.reset_led()
             subprocess.call('sudo shutdown now', shell=True)
