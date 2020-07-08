@@ -220,14 +220,19 @@ class volume:
         tab('Loading volume...')
         tab('Getting current volume...', 2)
         cls.volume=cls._get_volume()
+        volume.update()
         tab('Volume is set to '+str(cls.volume))
     
     @classmethod
-    def change(cls, vol):
+    def update(cls):
         subprocess.call('amixer -q set Master %d%%' % vol, shell=True)
-        speak.say('Volume set to', str(vol))
-        print('Volume: ', vol)
+    
+    @classmethod
+    def change(cls, vol):
         cls.volume=vol
+        print('Volume: ', vol)
+        cls.update()
+        speak.say('Volume set to', str(vol))
     
     @classmethod
     def _get_volume(cls):
