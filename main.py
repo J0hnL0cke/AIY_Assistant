@@ -236,8 +236,7 @@ class volume:
     
     @classmethod
     def _get_volume(cls):
-        #res=subprocess.check_output(r'amixer get Master | grep "Front Left:" | sed "s/.*\[\([0-9]\+\)%\].*/\1/"', shell=True).strip()
-        res=5
+        res=subprocess.check_output(r'amixer get Master | grep "Front Left:" | sed "s/.*\[\([0-9]\+\)%\].*/\1/"', shell=True).strip()
         return int(res)
     
     @classmethod
