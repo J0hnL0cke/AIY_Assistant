@@ -59,32 +59,17 @@ You can train a custom voice model or use a universal model.
 
 You will need to download the .pmdl/.umdl file onto the device. 
 
+Now run the build.py file and follow the instructions.
+
+When you are asked to enter a path to install to, you can use a relative path like "./files", or absolute, like "/~/AIY-projects-python/src/aiy/recognizer/files"
+
+When you are asked to enter a path to your snowboy model, you can use a relative path from the main.py file, such as "./model.pmdl", or abslolute, like "/~/AIY-projects-python/src/aiy/recognizer/model.pmdl"
 
 **First run:**
 
 `cd` into the repository if not already in it
 
-`mkdir data`
-
-`mkdir music`
-
 run `python3 main.py`
-
-You will immediately run into errors because your configuration files are not set up.
-
-Luckily, you just created them.
-
-`cd data/`
-
-Now you need to change 2 files using your editor of choice:
-
-Open houndify.txt and paste in your ids. Line 1 should be ProjectID and line 2 should be ClientID.
-
-Open path_to_voice_model.txt and paste in the path to your voice model. I suggest putting it in the top folder of the repo.
-
-The path can be relative to the main.py file, such as "./model.pmdl", or abslolute, like "/~/AIY-projects-python/src/aiy/recognizer/model.pmdl"
-
-Now go back to the top level of the repo and run `python3 main.py` again.
 
 You should be good to go. If you have an issue, report it [here](https://github.com/J0hnL0cke/AIY_Assistant/issues/new)
 
