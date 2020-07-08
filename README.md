@@ -10,6 +10,7 @@ Assistant built for the Google Voice AIY that can understand and respond to user
 - Ability to change device volume
 - Ability to store queries that are not understood
 - Ability to give device IP address
+- Ability to stream or download and play audio from YouTube
 
 More features, such as ability to play music and record audio on demand, are planned for the future
 
@@ -57,13 +58,13 @@ Next, head over to the [Snowboy Dashboard](https://snowboy.kitt.ai/dashboard).
 
 You can train a custom voice model or use a universal model.
 
-You will need to download the .pmdl/.umdl file onto the device. 
+You will need to download the .pmdl/.umdl file onto the device.
 
 Now run the build.py file and follow the instructions.
 
-When you are asked to enter a path to install to, you can use a relative path like "./files", or absolute, like "/~/AIY-projects-python/src/aiy/recognizer/files"
+When you are asked to enter a path to install to, you can use a relative path like "./files", or an absolute path, like "/~/AIY-projects-python/src/aiy/recognizer/files"
 
-When you are asked to enter a path to your snowboy model, you can use a relative path from the main.py file, such as "./model.pmdl", or abslolute, like "/~/AIY-projects-python/src/aiy/recognizer/model.pmdl"
+When you are asked to enter a path to your Snowboy model, you can use a relative path from the main.py file, such as "./model.pmdl", or an abslolute path, like "/~/AIY-projects-python/src/aiy/recognizer/model.pmdl"
 
 **First run:**
 
