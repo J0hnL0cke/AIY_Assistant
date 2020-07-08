@@ -523,7 +523,10 @@ class record:
     def new(cls):
         btn.set_event()
         print("Recording started, press button to stop recording")
-        record_file(AudioFormat.CD, filename=cls.args.filename, wait=cls.interval, filetype='wav')
+        try:
+            record_file(AudioFormat.CD, filename=cls.args.filename, wait=cls.interval, filetype='wav')
+        except KeyboardInterrupt:
+            print("Keyboard interrupt detected.")
         print("Recording stopped")
         return cls.filename
     
@@ -565,17 +568,21 @@ class recognize:
         
         #Record what the user said
         file_name=record.new()
-        lights.button_change('cyan')
-        print("Interpreting speech...")
-        
-        #Get path to the audio file and load it
-        audio=cls.parse_audio(file_name)
-        
-        #Send the audio file to Houndify for recognition, return text
-        text=cls.get_text(audio)
-        
-        #return the text that the user said so it can be interpreted
-        return text
+        if files.file_exists("{0}.wav".format(record.args.filename)):
+            lights.button_change('cyan')
+            print("Interpreting speech...")
+            
+            #Get path to the audio file and load it
+            audio=cls.parse_audio(file_name)
+            
+            #Send the audio file to Houndify for recognition, return text
+            text=cls.get_text(audio)
+            
+            #return the text that the user said so it can be interpreted
+            return text
+        else:
+            print("Recording file does not exist")
+            return None
     
     @classmethod
     def parse_audio(cls,fname):
@@ -667,8 +674,11 @@ class trigger:
     
     @classmethod
     def getConsoleInput(cls):
-        while True:
-            cls.commands.append(input("Accepting keyboard input\n"))
+        try:
+            while True:
+                cls.commands.append(input("Accepting keyboard input\n"))
+        except KeyboardInterrupt:
+            raise
     
     @classmethod
     def getNextCommand(cls):
@@ -757,14 +767,14 @@ class main_thread:
             print('You said "'+str(text)+'".')
             lights.button_change('blue')
             
-            if len(str(text))==0:
+            if text is None:
+                print("Nothing to recognize")
+            elif len(str(text))==0:
                 #Nothing was heard
                 speak.say("Sorry, I didn't hear you.")
                 print("I didn't hear you. Please press the button and try again.")
-            elif text is None:
-                print("Nothing to recognize")
             else:
-                main_thread.recognize(text.lower())
+                main_thread.recognize(str(text).lower())
     
     @classmethod
     def starts(cls, text, beginning):
