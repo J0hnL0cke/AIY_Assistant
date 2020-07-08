@@ -337,7 +337,7 @@ class music:
                     
                     title=cls._get_title_from_id(song_id)
                     
-                    if title is None or not files.file_exists('music/'+song_id+'.mp3'):
+                    if title is None or not files.file_exists('music/'+song_id+'.mp3',False):
                         #Song exists but is not saved locally
                         if cls.save_files:
                             print("Song not downloaded, downloading...")
@@ -542,12 +542,16 @@ class record:
         start = time.monotonic()
         duration=0
         finished=False
+        hotword.resetSpeaking()
         while not finished:
-            if btn.was_pressed() or duration > 5:
+            duration = time.monotonic() - start
+            if btn.was_pressed() or (hotword.doneSpeaking() and duration > 1):
+                finished=True
+            elif duration > 5 and hotword.speaking==0:
+                print("User said nothing")
                 finished=True
             else:
-                duration = time.monotonic() - start
-                print('Recording: %.02f seconds [Press button to stop]' % duration)
+                print('Recording: %.02f seconds.' % duration, "speaking:", hotword.isSpeaking())
                 time.sleep(0.5)
 
 class recognize:
@@ -568,7 +572,7 @@ class recognize:
         
         #Record what the user said
         file_name=record.new()
-        if files.file_exists("{0}.wav".format(record.args.filename)):
+        if files.file_exists(file_name,False):
             lights.button_change('cyan')
             print("Interpreting speech...")
             
@@ -630,6 +634,7 @@ class hotword:
             cls.detector.start(cls.detected_callback)
         except:
             print('Error starting detector')
+            raise
         print("Detector running")
 
     @classmethod
@@ -645,6 +650,29 @@ class hotword:
     @classmethod
     def was_said(cls):
         return cls.detected
+        
+    @classmethod
+    def doneSpeaking(cls):
+        sp=cls.isSpeaking()
+        if sp:
+            cls.speaking=1
+        elif cls.speaking > 0:
+            cls.speaking+=1
+        
+        #User spoke then was silent for 4 checks
+        if cls.speaking > 4:
+            print("User stopped speaking")
+            return True
+        else:
+            return False
+        
+    @classmethod
+    def resetSpeaking(cls):
+        cls.speaking=0
+        
+    @classmethod
+    def isSpeaking(cls):
+        return cls.detector.vad_status >= 0
     
 class trigger:
     

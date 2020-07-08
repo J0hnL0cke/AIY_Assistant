@@ -202,6 +202,7 @@ class HotwordDetector(object):
                 continue
 
             status = self.detector.RunDetection(data)
+            self.vad_status=status
             if status == -1:
                 logger.warning("Error initializing streams or reading audio data")
 
