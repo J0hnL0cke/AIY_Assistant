@@ -643,8 +643,15 @@ class trigger:
     
     #Waits for a trigger from the user
     #Stops when the user presses the button or speaks the hotword
+
+    @classmethod
+    def init(cls):
+        cls.commands=[]
+        cls.input_thread = threading.Thread(target=cls.getConsoleInput, daemon=True)
+        cls.input_thread.start()
     
-    def wait():
+    @classmethod
+    def wait(cls):
         hotword.reset_detector()
         btn.set_event()
         
@@ -652,11 +659,31 @@ class trigger:
         print('looping, started =',hotword.started)
         
         while looping:
-            if hotword.was_said() or btn.was_pressed():
+            if hotword.was_said() or btn.was_pressed() or cls.hasCommands():
                 print('Exiting loop')
                 looping=False
             else:
                 time.sleep(0.5)
+    
+    @classmethod
+    def getConsoleInput(cls):
+        while True:
+            cls.commands.append(input("Accepting keyboard input\n"))
+    
+    @classmethod
+    def getNextCommand(cls):
+        if cls.hasCommands():
+            first=cls.commands[0]
+            cls.commands.pop(0)
+            return first
+        else:
+            return None
+            
+            
+    @classmethod
+    def hasCommands(cls):
+        has_command=len(cls.commands)!=0
+        return has_command
 
 class main_thread:
     
@@ -688,20 +715,11 @@ class main_thread:
         recognize.init()
         record.init()
         hotword.init()
+        trigger.init()
         
         #Set initialized flag, allowing main.run() to be called without error
         cls.initialized=True
         
-        #If set to True, input is only accepted through
-        is_console_only=files.load_file("console_only","None")[0]
-        if is_console_only=="True":
-            cls.console_only=True
-            print("console_only set to True")
-        elif is_console_only=="False":
-            cls.console_only=False
-        else:
-            cls.console_only=False
-            files.write_file("console_only","False\n\nSet to True to disable hotword detection and only accept input through the command line")
         
     @classmethod
     def run(cls):
@@ -717,16 +735,15 @@ class main_thread:
         while cls.keep_running:
             lights.button_change('green')
             
-            if cls.console_only:
-                text=input("Enter command: ")
-                lights.button_change('blue')
-            else:
+            if not trigger.hasCommands():
                 print('Press the button or say the hotword')
-                
                 trigger.wait()
-                
+            
+            command=trigger.getNextCommand()
+            if command is None:
+            
                 if music.playing:
-                    print('Pausing song for button press')
+                    print('Pausing song')
                     music.pause()
                 
                 lights.button_change('yellow')
@@ -734,8 +751,11 @@ class main_thread:
                 
                 text=recognize.main()
                 
-                print('You said "'+str(text)+'".')
-                lights.button_change('blue')
+            else:
+                text=command
+            
+            print('You said "'+str(text)+'".')
+            lights.button_change('blue')
             
             if len(str(text))==0:
                 #Nothing was heard
@@ -819,8 +839,7 @@ class main_thread:
             if music.has_music==True and music.playing==True:
                 #no need to pause because song is already paused
                 music.playing=False
-                if cls.console_only:
-                    music.pause(True)
+                music.pause(True)
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':

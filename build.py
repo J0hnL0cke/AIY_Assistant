@@ -107,8 +107,6 @@ if client_id=="" or client_key=="":
 if model_path=="":
     print("It appears you do not have a Snowboy voice model. Because of this, you won't be able to use Snowboy wake word detection.")
     missing=True
-    
-command_only=ask.yesOrNo("Would you like to enable command line mode instead of voice mode?\nThis will disable voice queries and allow you to enter queries through the console.")
 
 #Make directories
 print("\nFinished questions.")
@@ -123,8 +121,6 @@ if ask.yesOrNo("Run build script?"):
     #Make needed files
     write("data/houndify.txt",client_info)
     write("data/path_to_voice_model.txt",model_path)
-    if command_only:
-        write("data/console_only.txt","True\n\nSet to True to disable hotword detection and only accept input through the command line")
     
     print("\nFinished writing files.\nIf you didn't have one or more of the items required to complete the build process, you can always run it again later.")
     print("Don't forget to install dependencies listed in the README if you haven't already.")
