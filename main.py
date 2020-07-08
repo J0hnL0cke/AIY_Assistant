@@ -225,7 +225,7 @@ class volume:
     
     @classmethod
     def update(cls):
-        subprocess.call('amixer -q set Master %d%%' % vol, shell=True)
+        subprocess.call('amixer -q set Master %d%%' % cls.volume, shell=True)
     
     @classmethod
     def change(cls, vol):
