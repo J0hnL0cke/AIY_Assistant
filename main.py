@@ -359,11 +359,11 @@ class music:
     def find_music(cls,search_term):
         try:
             can_play=True
-            log.info("Searching for song...")
+            log.debug("Checking if search term is already indexed")
             song_id=cls._get_id_from_term(search_term)
             
             if song_id is None:
-                log.debug("Not sure what song you meant. Searching Youtube...")
+                log.debug("Song not found in index, searching Youtube...")
                 speak.say("Searching for "+search_term)
                 #Song isn't indexed, search YT
                 try:
@@ -410,7 +410,7 @@ class music:
                             cls.song_ids[song_id]=song_title
     
                         else:
-                            log.debug("Song not downloaded. Save_files is set to False")
+                            log.debug("Song not downloaded, save_files is set to False")
                             log.info("Streaming song...")
                             cls._stream_music(song_url)
                     
@@ -929,8 +929,6 @@ class main_thread:
         #This section is music/volume related
         
         elif text in cls.replay:
-            log.error("Can't play playlists yet!")
-            #TODO: playlists
             if music.has_music:
                 if music.last_song=='':
                     speak.say('You have not played a song recently')
