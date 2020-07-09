@@ -33,8 +33,8 @@ class log:
         cls.fileHandler.setLevel(logging.DEBUG)
         
         #Set formatting of logs
-        cls.console.setFormatter(log_formatter())
-        cls.fileHandler.setFormatter(log_formatter())
+        cls.console.setFormatter(log_console_formatter())
+        cls.fileHandler.setFormatter(log_file_formatter())
         
         cls.rootLogger.addHandler(cls.console)
         cls.rootLogger.addHandler(cls.fileHandler)
