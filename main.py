@@ -23,7 +23,7 @@ class log:
         #Set formatting of logs
         cls.console_formatter = logging.Formatter('%(levelname)s:%(message)s')
         
-        cls.log_formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        cls.log_formatter=logging.Formatter('%(name)s - line %(lineno)d : %(levelname)s - %(message)s')
         cls.console.setFormatter(cls.console_formatter)
         cls.fileHandler.setFormatter(cls.log_formatter)
         
