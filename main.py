@@ -643,11 +643,13 @@ class music:
     
 class btn:
     
+    stage=0
+    
     @classmethod
     def init(cls):
         log.debug('Initalizing button...')
         cls.board=aiy_board.Board()
-        cls.event_was_set=False
+        cls.stage=1
     
     @classmethod
     def wait(cls):
@@ -658,14 +660,20 @@ class btn:
     def set_event(cls):
         cls.done = threading.Event()
         cls.board.button.when_pressed=cls.done.set
-        cls.event_was_set=True
+        cls.stage=2
         log.debug("Set up button pressed event")
         
     @classmethod
     def was_pressed(cls):
-        assert cls.event_was_set
+        assert cls.stage==2
         return cls.done.is_set()
-   
+        
+    @classmethod
+    def clean_up(cls):
+        if cls.stage > 0:
+            cls.board.button.close()
+            log.debug("Cleaned up button handler")
+        
 class record:
 
     callback=None
@@ -1206,5 +1214,7 @@ if __name__=='__main__':
         raise
     finally:
         lights.reset_led()
+        btn.clean_up()
+        
 else:
     log.debug('Done initalizing.')
