@@ -458,7 +458,7 @@ class music:
                         meta=ydl.extract_info(search_term, download=False)
                         
                 except KeyboardInterrupt:
-                    log.warn("KeyboardInterrupt")
+                    log.warning("KeyboardInterrupt")
                     raise
                     
                 except Exception:
@@ -525,7 +525,7 @@ class music:
                     cls.vlc_player.play()
                 
                 except KeyboardInterrupt:
-                    log.warn("KeyboardInterrupt when playing song")
+                    log.warning("KeyboardInterrupt when playing song")
                     raise
                 
                 except:
@@ -583,7 +583,7 @@ class music:
             with youtube_dl.YoutubeDL(opts) as ydl:
                 ydl.download([url])
         except KeyboardInterrupt:
-            log.warn("KeyboardInterrupt while downloading")
+            log.warning("KeyboardInterrupt while downloading")
             raise
         except:
           log.error("Error downloading song:", sys.exc_info()[0])
@@ -685,7 +685,7 @@ class record:
         try:
             record_file(AudioFormat.CD, filename=cls.args.filename, wait=cls.interval, filetype='wav')
         except KeyboardInterrupt:
-            log.warn("KeyboardInterrupt whle recording audio")
+            log.warning("KeyboardInterrupt whle recording audio")
         log.info("Recording stopped")
         return cls.filename
     
@@ -1200,7 +1200,7 @@ if __name__=='__main__':
         log.info('Done initalizing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
-        log.warn("Keyboard interrupt detected")
+        log.warning("Keyboard interrupt detected")
     except:
         log.critical("Unexpected error")
         raise
