@@ -136,7 +136,7 @@ class log_file_formatter(logging.Formatter):
         
     def file(self, record):
 
-        elif record.levelno == logging.DEBUG or record.levelno == logging.INFO:
+        if record.levelno == logging.DEBUG or record.levelno == logging.INFO:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
             self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
