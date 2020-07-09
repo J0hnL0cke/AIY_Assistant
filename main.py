@@ -118,7 +118,7 @@ class log_console_formatter(logging.Formatter):
     def format(self, record):
         
         #Copy the record so the original is not changed, which would change the event the file handler logs
-        r=record.copy()
+        r=copy.copy(record)
         if r.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
             r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
@@ -1148,6 +1148,7 @@ class main_thread:
 
 #Initalize logging
 import inspect
+import copy
 log.init()
 
 log.debug("Logging started")
