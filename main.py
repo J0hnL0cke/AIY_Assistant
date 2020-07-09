@@ -1,4 +1,5 @@
-#Import statements at bottom of file
+#Other import statements at bottom of file
+import logging
 
 def imp(package_name):
     
@@ -6,6 +7,17 @@ def imp(package_name):
     return importlib.import_module(package_name)
 
 class log:
+    
+    COLOR_SEQ = "\033[1;%dm"
+    RESET_SEQ = "\033[0m"
+    COLORS = {
+        'WARNING': YELLOW,
+        'INFO': WHITE,
+        'DEBUG': BLUE,
+        'CRITICAL': YELLOW,
+        'ERROR': RED
+    }
+
     @classmethod
     def init(cls):
         
@@ -37,7 +49,8 @@ class log:
         #Build the log
         log_dict={
             "msg": cls._format_str(msg),
-            "exc_info": exc_info,
+            #"exc_info": exc_info,
+            "levelno": lvl,
             "levelname": logging.getLevelName(lvl)
         }
         
@@ -66,7 +79,7 @@ class log:
         
         #Log the event
         record = logging.makeLogRecord(log_dict)
-        cls.logger.emit(record)
+        cls.logger.handle(record)
         
     @classmethod
     def _format_str(cls,text):
@@ -103,12 +116,19 @@ class log:
 class log_formatter(logging.Formatter):
 
     def format(self, record):
+
         if record.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
         elif record.levelno == logging.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
             self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
+            
+        levelname = record.levelname
+        if levelname in log.COLORS:
+            levelname_color = log.COLOR_SEQ % (30 + log.COLORS[levelname]) + levelname + log.RESET_SEQ
+            record.levelname = levelname_color
+            
         return super().format(record)
     
 class speak:
@@ -159,7 +179,7 @@ class lights:
         #TODO: keep or remove?
         log.debug('Initalizing leds...')
         cls._get_led_inst()
-        log.debug('Setting LED...', 2)
+        log.debug('Setting LED...')
         cls.button_change('purple')
     
     @classmethod
@@ -213,17 +233,17 @@ class files:
     @classmethod
     def init(cls):
         log.debug('Initalizing files...')
-        log.debug('Loading playlist...', 2)
+        log.debug('Loading playlist...')
         cls.playlist=cls.load_file('playlist', '')
         if type(cls.playlist)!=list:
             cls.playlist=[]
-        log.debug('Playlist has '+str(len(cls.playlist))+' items.', 2)
-        log.debug('Loading name...', 2)
+        log.debug('Playlist has '+str(len(cls.playlist))+' items.')
+        log.debug('Loading name...')
         cls.name=cls.load_file('name', 'human')
-        log.debug('Name is '+str(cls.name), 2)
-        log.debug('Loading location...', 2)
+        log.debug('Name is '+str(cls.name))
+        log.debug('Loading location...')
         cls.location=cls.load_file('location', 'Null Island')
-        log.debug('Location is '+cls.location, 2)
+        log.debug('Location is '+cls.location)
     
     @classmethod
     def _nofile(cls, file, contents, use_default=True):
@@ -253,7 +273,6 @@ class files:
         try:
             contents=[]
             with open(loc+file+'.txt') as data:
-                log.debug("Retrieved", str(data), "from", loc+file+'.txt')
                 for each_line in data:
                     try:
                         line=each_line.strip()
@@ -267,6 +286,7 @@ class files:
             contents=not_found
         if len(contents)==1:
             contents=contents[0]
+        log.debug("Retrieved", contents, "from", loc+file+'.txt')
         return contents
     
     @classmethod
@@ -323,7 +343,7 @@ class volume:
     @classmethod
     def init(cls):
         log.debug('Loading volume...')
-        log.debug('Getting current volume...', 2)
+        log.debug('Getting current volume...')
         cls.volume=cls._get_volume()
         volume.update()
         log.debug('Volume is set to '+str(cls.volume))
@@ -368,7 +388,7 @@ class music:
     def init(cls):
         log.debug('Loading music...')
         
-        log.debug('Loading Youtube_DL', 2)
+        log.debug('Loading Youtube_DL')
         #Set Youtube DL options
         cls.ydl_opts={
             'default_search': 'ytsearch1:',
@@ -396,7 +416,7 @@ class music:
         
         cls._load_dicts()
         
-        log.debug('Loading VLC...', 2)
+        log.debug('Loading VLC...')
         cls.vlc_instance=vlc.get_default_instance()
         
         #create a playlist?
@@ -1112,9 +1132,8 @@ class main_thread:
 """IMPORT PACKAGES"""
 
 
-import logging
-import inspect
 #Initalize logging
+import inspect
 log.init()
 
 log.debug("Logging started")
