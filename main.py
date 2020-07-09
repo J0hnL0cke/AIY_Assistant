@@ -13,9 +13,9 @@ class log:
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
     COLORS = {
         'WARNING': YELLOW,
-        'INFO': WHITE,
+        'INFO': GREEN,
         'DEBUG': BLUE,
-        'CRITICAL': YELLOW,
+        'CRITICAL': ORANGE,
         'ERROR': RED
     }
 
@@ -33,7 +33,6 @@ class log:
         cls.fileHandler.setLevel(logging.DEBUG)
         
         #Set formatting of logs
-        cls.format = logging.Formatter('%(levelname)s:%(message)s')
         cls.console.setFormatter(log_formatter())
         cls.fileHandler.setFormatter(log_formatter())
         
@@ -114,12 +113,13 @@ class log:
     def critical(cls,*text):
         cls._make_record(text,logging.CRITICAL)
     
-class log_formatter(logging.Formatter):
+class log_console_formatter(logging.Formatter):
 
-    def format(self, record):
+    def console(self, record):
 
         if record.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
+            record.msg = log.COLOR_SEQ % (30 + log.COLORS[levelname]) + record.msg + log.RESET_SEQ
         elif record.levelno == logging.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
@@ -129,6 +129,17 @@ class log_formatter(logging.Formatter):
         if levelname in log.COLORS:
             levelname_color = log.COLOR_SEQ % (30 + log.COLORS[levelname]) + levelname + log.RESET_SEQ
             record.levelname = levelname_color
+            
+        return super().format(record)
+        
+class log_file_formatter(logging.Formatter):
+        
+    def file(self, record):
+
+        elif record.levelno == logging.DEBUG or record.levelno == logging.INFO:
+            self._style._fmt = "%(levelname)s: %(msg)s"
+        else:
+            self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
             
         return super().format(record)
     
