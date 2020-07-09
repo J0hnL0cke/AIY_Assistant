@@ -122,7 +122,7 @@ class log_console_formatter(logging.Formatter):
         if r.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
             r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
-        elif r.levelno == r.DEBUG:
+        elif r.levelno == logging.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
             self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
@@ -298,9 +298,9 @@ class files:
         except IOError:
             cls._nofile(file, not_found, use_default)
             contents=not_found
+        log.debug("Retrieved", len(contents), "lines from", loc+file+'.txt')
         if len(contents)==1:
             contents=contents[0]
-        log.debug("Retrieved", contents, "from", loc+file+'.txt')
         return contents
     
     @classmethod
