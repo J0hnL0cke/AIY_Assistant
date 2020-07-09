@@ -15,7 +15,7 @@ class log:
         'WARNING': YELLOW,
         'INFO': GREEN,
         'DEBUG': BLUE,
-        'CRITICAL': ORANGE,
+        'CRITICAL': YELLOW,
         'ERROR': RED
     }
 
