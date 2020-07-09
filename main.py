@@ -116,21 +116,23 @@ class log:
 class log_console_formatter(logging.Formatter):
 
     def format(self, record):
-
-        if record.levelno == logging.INFO:
+        
+        #Copy the record so the original is not changed, which would change the event the file handler logs
+        r=record.copy()
+        if r.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
-            record.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + record.msg + log.RESET_SEQ
-        elif record.levelno == logging.DEBUG:
+            r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
+        elif r.levelno == r.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
             self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
             
-        levelname = record.levelname
+        levelname = r.levelname
         if levelname in log.COLORS:
             levelname_color = log.COLOR_SEQ % (30 + log.COLORS[levelname]) + levelname + log.RESET_SEQ
-            record.levelname = levelname_color
+            r.levelname = levelname_color
             
-        return super().format(record)
+        return super().format(r)
         
 class log_file_formatter(logging.Formatter):
         
@@ -456,7 +458,7 @@ class music:
                         meta=ydl.extract_info(search_term, download=False)
                         
                 except KeyboardInterrupt:
-                    log.info("KeyboardInterrupt")
+                    log.warn("KeyboardInterrupt")
                     raise
                     
                 except Exception:
@@ -523,7 +525,7 @@ class music:
                     cls.vlc_player.play()
                 
                 except KeyboardInterrupt:
-                    log.info("KeyboardInterrupt when playing song")
+                    log.warn("KeyboardInterrupt when playing song")
                     raise
                 
                 except:
@@ -581,7 +583,7 @@ class music:
             with youtube_dl.YoutubeDL(opts) as ydl:
                 ydl.download([url])
         except KeyboardInterrupt:
-            log.info("KeyboardInterrupt while downloading")
+            log.warn("KeyboardInterrupt while downloading")
             raise
         except:
           log.error("Error downloading song:", sys.exc_info()[0])
@@ -683,7 +685,7 @@ class record:
         try:
             record_file(AudioFormat.CD, filename=cls.args.filename, wait=cls.interval, filetype='wav')
         except KeyboardInterrupt:
-            log.info("KeyboardInterrupt whle recording audio")
+            log.warn("KeyboardInterrupt whle recording audio")
         log.info("Recording stopped")
         return cls.filename
     
@@ -1197,7 +1199,7 @@ if __name__=='__main__':
         log.info('Done initalizing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
-        log.info("Keyboard interrupt detected")
+        log.warn("Keyboard interrupt detected")
     except:
         log.critical("Unexpected error")
         raise
