@@ -115,7 +115,7 @@ class log:
     
 class log_console_formatter(logging.Formatter):
 
-    def console(self, record):
+    def format(self, record):
 
         if record.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
@@ -134,7 +134,7 @@ class log_console_formatter(logging.Formatter):
         
 class log_file_formatter(logging.Formatter):
         
-    def file(self, record):
+    def format(self, record):
 
         if record.levelno == logging.DEBUG or record.levelno == logging.INFO:
             self._style._fmt = "%(levelname)s: %(msg)s"
