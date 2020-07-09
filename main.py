@@ -16,10 +16,16 @@ class log:
         cls.fileHandler = logging.FileHandler("log.log")
         
         #console accepts logs at least as severe as INFO
-        cls.console.setLevel(logging.INFO)
-        
         #log file accepts logs at least as severe as DEBUG
+        cls.console.setLevel(logging.INFO)
         cls.fileHandler.setLevel(logging.DEBUG)
+        
+        #Set formatting of logs
+        cls.console_formatter = logging.Formatter('%(levelname)s:%(message)s')
+        
+        cls.log_formatter=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        cls.console.setFormatter(cls.console_formatter)
+        cls.fileHandler.setFormatter(cls.log_formatter)
         
         cls.rootLogger.addHandler(cls.console)
         cls.rootLogger.addHandler(cls.fileHandler)
