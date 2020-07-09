@@ -21,12 +21,12 @@ class log:
 
     @classmethod
     def init(cls):
-        
+        files.write_file("log","",False)
         cls.rootLogger = logging.getLogger(__name__)
         cls.rootLogger.setLevel(logging.NOTSET)
         
         cls.console = logging.StreamHandler()#sys.stdout)
-        cls.fileHandler = logging.FileHandler("log.log")
+        cls.fileHandler = logging.FileHandler("log.txt")
         
         #console accepts logs at least as severe as INFO
         #log file accepts logs at least as severe as DEBUG
