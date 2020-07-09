@@ -10,6 +10,7 @@ class log:
     
     COLOR_SEQ = "\033[1;%dm"
     RESET_SEQ = "\033[0m"
+    BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
     COLORS = {
         'WARNING': YELLOW,
         'INFO': WHITE,
