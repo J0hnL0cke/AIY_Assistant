@@ -119,7 +119,7 @@ class log_console_formatter(logging.Formatter):
 
         if record.levelno == logging.INFO:
             self._style._fmt = "%(msg)s"
-            record.msg = log.COLOR_SEQ % (30 + log.COLORS[levelname]) + record.msg + log.RESET_SEQ
+            record.msg = log.COLOR_SEQ % (30 + log.COLORS[INFO]) + record.msg + log.RESET_SEQ
         elif record.levelno == logging.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
