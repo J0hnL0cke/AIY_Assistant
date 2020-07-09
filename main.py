@@ -9,7 +9,7 @@ class log:
     @classmethod
     def init(cls):
         
-        cls.rootLogger = logging.getLogger()
+        cls.rootLogger = logging.getLogger(__name__)
         cls.rootLogger.setLevel(logging.NOTSET)
         
         cls.console = logging.StreamHandler()#sys.stdout)
@@ -21,16 +21,52 @@ class log:
         cls.fileHandler.setLevel(logging.DEBUG)
         
         #Set formatting of logs
-        cls.console_formatter = logging.Formatter('%(levelname)s:%(message)s')
-        
-        cls.log_formatter=logging.Formatter('%(name)s - line %(lineno)d : %(levelname)s - %(message)s')
-        cls.console.setFormatter(cls.console_formatter)
-        cls.fileHandler.setFormatter(cls.log_formatter)
+        cls.format = logging.Formatter('%(levelname)s:%(message)s')
+        cls.console.setFormatter(log_formatter())
+        cls.fileHandler.setFormatter(log_formatter())
         
         cls.rootLogger.addHandler(cls.console)
         cls.rootLogger.addHandler(cls.fileHandler)
         
-        cls.logger = logging.getLogger(__name__)
+        cls.logger = cls.rootLogger
+        cls.logger.propagate = False
+        
+    @classmethod
+    def _make_record(cls,msg,lvl):
+        
+        #Build the log
+        log_dict={
+            "msg": cls._format_str(msg),
+            "exc_info": exc_info,
+            "levelname": logging.getLevelName(lvl)
+        }
+        
+        if lvl!=logging.DEBUG and lvl!=logging.INFO:
+            
+            #get info about the method that called the log
+            callerframerecord = inspect.stack()[2]
+            frame = callerframerecord[0]
+            info = inspect.getframeinfo(frame)
+            try:
+                filename=info.filename
+                function=info.function
+                line=info.lineno
+            finally:
+                del info
+                del frame
+            
+            #Set levelname
+        
+            #Build the log
+            more_info={
+                "lineno": line,
+                "funcName": function,
+            }
+            log_dict.update(more_info)
+        
+        #Log the event
+        record = logging.makeLogRecord(log_dict)
+        cls.logger.emit(record)
         
     @classmethod
     def _format_str(cls,text):
@@ -43,26 +79,37 @@ class log:
                 first=False
             build+=str(obj)
         return build
-        
+    
     @classmethod
     def debug(cls,*text):
-        cls.logger.debug(cls._format_str(text))
-        
+        cls._make_record(text,logging.DEBUG)
+    
     @classmethod
     def info(cls,*text):
-        cls.logger.info(cls._format_str(text))
-        
+        cls._make_record(text,logging.INFO)
+    
     @classmethod
     def warning(cls,*text):
-        cls.logger.warning(cls._format_str(text))
-
+        cls._make_record(text,logging.WARNING)
+    
     @classmethod
     def error(cls,*text):
-        cls.logger.error(cls._format_str(text))
-        
+        cls._make_record(text,logging.ERROR)
+    
     @classmethod
     def critical(cls,*text):
-        cls.logger.critical(cls._format_str(text))
+        cls._make_record(text,logging.CRITICAL)
+    
+class log_formatter(logging.Formatter):
+
+    def format(self, record):
+        if record.levelno == logging.INFO:
+            self._style._fmt = "%(msg)s"
+        elif record.levelno == logging.DEBUG:
+            self._style._fmt = "%(levelname)s: %(msg)s"
+        else:
+            self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
+        return super().format(record)
     
 class speak:
     @classmethod
@@ -939,7 +986,7 @@ class main_thread:
                 if music.last_song=='':
                     speak.say('You have not played a song recently')
                 else:
-                    speak.say('Replaying the song')
+                    log.info('Replaying the song')
                     music.find_music(music.last_song)
                 
             else:
@@ -1066,6 +1113,7 @@ class main_thread:
 
 
 import logging
+import inspect
 #Initalize logging
 log.init()
 
@@ -1118,7 +1166,7 @@ if __name__=='__main__':
         log.info('Done initalizing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
-        log.info("\nKeyboard interrupt detected")
+        log.info("Keyboard interrupt detected")
     except:
         log.critical("Unexpected error")
         raise
