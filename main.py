@@ -21,7 +21,6 @@ class log:
 
     @classmethod
     def init(cls):
-        files.write_file("log","",False)
         cls.rootLogger = logging.getLogger(__name__)
         cls.rootLogger.setLevel(logging.NOTSET)
         
@@ -43,6 +42,7 @@ class log:
         
         cls.logger = cls.rootLogger
         cls.logger.propagate = False
+        files.write_file("log","",False)
         
     @classmethod
     def _make_record(cls,msg,lvl):
