@@ -134,7 +134,7 @@ class log_console_formatter(logging.Formatter):
             self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
             
             #Color error names
-            for errStr in errNames:
+            for errStr in log.errNames:
                 self._style._fmt = "%(msg)s"
                 r.msg =r.msg.replace(log.COLOR_SEQ % (30 + log.errColor['INFO']) + errStr + log.RESET_SEQ)
             
