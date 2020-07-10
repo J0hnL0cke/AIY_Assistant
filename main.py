@@ -732,7 +732,8 @@ class recognize:
         assert file_data!='' #Credentials file is missing or empty
         cls.HOUNDIFY_CLIENT_ID = file_data[0].replace("\n","") # Houndify client IDs are Base64-encoded strings
         cls.HOUNDIFY_CLIENT_KEY = file_data[1].replace("\n","") # Houndify client keys are Base64-encoded strings
-        
+        #Create a new recognizer instance
+        cls.r = sr.Recognizer()
     
     @classmethod
     def main(cls):
@@ -761,8 +762,6 @@ class recognize:
         AUDIO_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), fname)
         
         # use the audio file as the audio source
-        #Create a new recognizer instance
-        cls.r = sr.Recognizer()
         with sr.AudioFile(AUDIO_FILE) as source:
             audio = cls.r.record(source)  # read the entire audio file
         return audio
