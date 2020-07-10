@@ -828,8 +828,8 @@ class hotword:
         elif cls.speaking > 0:
             cls.speaking+=1
         
-        #User spoke then was silent for 4 checks
-        if cls.speaking > 4:
+        #User spoke then was silent for 2 checks (1 second)
+        if cls.speaking > 2:
             log.debug("User stopped speaking")
             return True
         else:
