@@ -1219,7 +1219,7 @@ if __name__=='__main__':
         log.info('Done initalizing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
-        log.warning("Keyboard interrupt detected")
+        log.warning("KeyboardInterrupt detected")
     except:
         log.critical("Unexpected error")
         raise
