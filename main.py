@@ -127,15 +127,16 @@ class log_console_formatter(logging.Formatter):
             self._style._fmt = "%(msg)s"
             #Color all of the debug message
             r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
+            
         elif r.levelno == logging.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
+            
         else:
             r=copy.copy(record)
             self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
             
             #Color error names
             for errStr in log.errNames:
-                self._style._fmt = "%(msg)s"
                 r.msg =r.msg.replace(errStr, log.COLOR_SEQ % (30 + log.errColor) + errStr + log.RESET_SEQ)
             
         levelname = r.levelname
