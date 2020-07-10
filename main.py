@@ -119,7 +119,7 @@ class log_console_formatter(logging.Formatter):
 
     def format(self, record):
         
-        #Copy the record so the original is not changed, which would change the event the file handler logs
+        #Copy the record so the original is not changed, which would change the event that the file handler logs
         r=copy.copy(record)
         
         if r.levelno == logging.INFO:
@@ -129,13 +129,15 @@ class log_console_formatter(logging.Formatter):
             #Color all of the debug message
             r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
         else:
+            
             #Format message
             self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
+            if "KeyboardInterrupt" in r.msg:
+                self._style._fmt="\n"+self._style._fmt
             
-            #Color error names
-            r.msg=r.msg.replace("KeyboardInterrupt","\nKeyboardInterrupt")
-            for errStr in log.errNames:
-                r.msg =r.msg.replace(errStr, log.COLOR_SEQ % (30 + log.errColor) + errStr + log.RESET_SEQ)
+        #Color error names
+        for errStr in log.errNames:
+            r.msg =r.msg.replace(errStr, log.COLOR_SEQ % (30 + log.errColor) + errStr + log.RESET_SEQ)
             
         levelname = r.levelname
         if levelname in log.COLORS:
