@@ -120,22 +120,20 @@ class log_console_formatter(logging.Formatter):
     def format(self, record):
         
         #Copy the record so the original is not changed, which would change the event the file handler logs
-        r=record
-        #Only copy record if needed
+        r=copy.copy(record)
+        
         if r.levelno == logging.INFO:
-            r=copy.copy(record)
+            
+            #Format message
             self._style._fmt = "%(msg)s"
             #Color all of the debug message
             r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
-            
-        elif r.levelno == logging.DEBUG:
-            self._style._fmt = "%(levelname)s: %(msg)s"
-            
         else:
-            r=copy.copy(record)
+            #Format message
             self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
             
             #Color error names
+            r.msg=r.msg.replace("KeyboardInterrupt","\nKeyboardInterrupt")
             for errStr in log.errNames:
                 r.msg =r.msg.replace(errStr, log.COLOR_SEQ % (30 + log.errColor) + errStr + log.RESET_SEQ)
             
@@ -470,7 +468,7 @@ class music:
                         meta=ydl.extract_info(search_term, download=False)
                         
                 except KeyboardInterrupt:
-                    log.warning("KeyboardInterrupt")
+                    log.warning("KeyboardInterrupt while searching for song")
                     raise
                     
                 except Exception:
@@ -551,7 +549,7 @@ class music:
                 speak.say("Sorry, I can't find", search_term)
                 
         except KeyboardInterrupt:
-            log.warning("KeyboardInterrupt detected, song operation canceled.")
+            log.info("KeyboardInterrupt detected, song operation canceled.")
         
     @classmethod
     def _get_id_from_term(cls, term):
