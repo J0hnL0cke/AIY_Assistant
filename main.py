@@ -135,9 +135,9 @@ class log_console_formatter(logging.Formatter):
             if "KeyboardInterrupt" in r.msg:
                 self._style._fmt="\n"+self._style._fmt
             
-        #Color error names
-        for errStr in log.errNames:
-            r.msg =r.msg.replace(errStr, log.COLOR_SEQ % (30 + log.errColor) + errStr + log.RESET_SEQ)
+            #Color error names
+            for errStr in log.errNames:
+                r.msg =r.msg.replace(errStr, log.COLOR_SEQ % (30 + log.errColor) + errStr + log.RESET_SEQ)
             
         levelname = r.levelname
         if levelname in log.COLORS:
