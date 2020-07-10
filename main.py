@@ -18,6 +18,8 @@ class log:
         'CRITICAL': YELLOW,
         'ERROR': RED
     }
+    errNames=["KeyboardInterrupt","ValueError","IOError"]
+    errColor=MAGENTA
 
     @classmethod
     def init(cls):
@@ -118,14 +120,23 @@ class log_console_formatter(logging.Formatter):
     def format(self, record):
         
         #Copy the record so the original is not changed, which would change the event the file handler logs
-        r=copy.copy(record)
+        r=record
+        #Only copy record if needed
         if r.levelno == logging.INFO:
+            r=copy.copy(record)
             self._style._fmt = "%(msg)s"
+            #Color all of the debug message
             r.msg = log.COLOR_SEQ % (30 + log.COLORS['INFO']) + r.msg + log.RESET_SEQ
         elif r.levelno == logging.DEBUG:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
-            self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
+            r=copy.copy(record)
+            self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
+            
+            #Color error names
+            for errStr in errNames:
+                self._style._fmt = "%(msg)s"
+                r.msg =r.msg.replace(log.COLOR_SEQ % (30 + log.errColor['INFO']) + errStr + log.RESET_SEQ)
             
         levelname = r.levelname
         if levelname in log.COLORS:
@@ -141,7 +152,7 @@ class log_file_formatter(logging.Formatter):
         if record.levelno == logging.DEBUG or record.levelno == logging.INFO:
             self._style._fmt = "%(levelname)s: %(msg)s"
         else:
-            self._style._fmt = "%(levelname)s: ln %(lineno)d in %(funcName)s: %(msg)s"
+            self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
             
         return super().format(record)
     
@@ -180,7 +191,7 @@ class lights:
             #This should provide some delay to allow the Leds() package to initialize.
             
             cls.led_inst=None
-            log.warning("Error: couldn't initalize leds")
+            log.warning("Couldn't initalize leds")
     
     @classmethod
     def init(cls):
@@ -961,6 +972,7 @@ class main_thread:
                 log.debug('Listening...')
                 
                 text=recognize.main()
+                log.info('You said "'+str(text)+'".')
                 
             else:
                 text=command
@@ -974,7 +986,6 @@ class main_thread:
                 speak.say("Sorry, I didn't hear you.")
                 log.debug("I didn't hear you. Please press the button and try again.")
             else:
-                log.debug('You said "'+str(text)+'".')
                 main_thread.recognize(str(text).lower())
     
     @classmethod
