@@ -1,0 +1,46 @@
+### BespON format: see bespon.org for details and bespon.org/spec_overview for syntax. Keep in mind: in BespON, indentation matters. ###
+
+config=
+    
+    path_to_config_file = `./config.txt` #Set path to the config file that the program should use
+    
+    #That was a joke
+    
+    volume = 50 #speaker volume
+    path_to_voice_model = `./model.pmdl` #path to your snowboy voice model
+    houndify_client_id = null #Replace these with the respective ids, quoted with backticks
+    houndify_client_key = null
+  
+logging =
+    
+    log_file_loc = `./log.txt` #Location where logs are saved
+    
+    console_log_lvl = INFO #Minimum severity level of logs output to the console
+    file_log_lvl = DEBUG #Minimum severity level of logs saved to the log file_log_lvl
+    #Log severity levels from lowest to highest =  DEBUG INFO WARNING ERROR CRITICAL
+
+user_data =
+    
+    name = Human
+    location = `Null Island`
+
+music =
+    
+    save_music = true #If true music is downloaded before playing. If false music is streamed without downloading
+    change_music_ext = true
+    music_file_ext = mp3 #What file extension to save music as
+    
+    playlists =
+        `my playlist` = [] #video ids
+        #other playlists can be added here
+    
+    song_ids =
+        null = null #song id = song title pairs
+    
+    song_terms =
+        null = null #search term = song id pairs
+
+other=
+    unknown_commands = [] #commands the recognizer didn't understand
+    
+    #More data can be stored here or in one of the above sections

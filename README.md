@@ -48,6 +48,8 @@ If you get an error installing with pip3, then try running the commands using pi
 
 `pip3 install python-vlc`
 
+`pip3 install bespon`
+
 **Configure the project**
 
 You will need an account on [Houndify](houndify.com) to use speech recognition.

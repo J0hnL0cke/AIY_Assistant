@@ -18,7 +18,7 @@ class log:
         'CRITICAL': YELLOW,
         'ERROR': RED
     }
-    errNames=["KeyboardInterrupt","ValueError","IOError"]
+    errNames=["KeyboardInterrupt","ValueError","IOError","AttributeError","UnexpectedEOF","ParseError","KeyError","TypeError","AssertionError"]
     errColor=MAGENTA
 
     @classmethod
@@ -43,7 +43,7 @@ class log:
         
         cls.logger = cls.rootLogger
         cls.logger.propagate = False
-        files.write_file("log","",False)
+        files.write_file("log.txt","")
         
     @classmethod
     def _make_record(cls,msg,lvl):
@@ -106,6 +106,10 @@ class log:
     @classmethod
     def warning(cls,*text):
         cls._make_record(text,logging.WARNING)
+        
+    @classmethod
+    def warn(cls,*text):
+        cls.warning(text)
     
     @classmethod
     def error(cls,*text):
@@ -145,7 +149,7 @@ class log_console_formatter(logging.Formatter):
             r.levelname = levelname_color
             
         return super().format(r)
-        
+
 class log_file_formatter(logging.Formatter):
         
     def format(self, record):
@@ -156,7 +160,69 @@ class log_file_formatter(logging.Formatter):
             self._style._fmt = "%(levelname)s: line %(lineno)d in %(funcName)s: %(msg)s"
             
         return super().format(record)
+
+class settings:
     
+    filename="config.bespon"
+    
+    @classmethod
+    def init(cls):
+        log.info("Loading settings from",cls.filename)
+        settings_string=files.load_file(cls.filename,"",False,False)
+        try:
+            parsed_settings=bespon.loads_roundtrip_ast(settings_string)
+        except bespon.erring.ParseError:
+            log.critical("ParseError, config file is formatted incorrectly")
+            raise
+        log.debug("Parsed settings:", parsed_settings)
+        cls.data=parsed_settings
+    
+    @classmethod
+    def get_value(cls,key,not_found=None):
+        if type(key)!=list:
+            key=[key]
+        sub_dict=None
+        for k in key:
+            sub_dict=cls._get_val(k,not_found,sub_dict)
+        if not sub_dict==None:
+            return sub_dict.value
+        else:
+            return None
+    
+    @classmethod
+    def _get_val(cls,key,not_found,sub_dict=None):
+        try:
+            if sub_dict==None:
+                return cls.data[key]
+            else:
+                return sub_dict[key]
+        except KeyError:
+            if not_found!=None:
+                log.debug("Key",key,"not found, defaulting to",not_found)
+                return not_found
+            else:
+                log.warning("Dictionary key",key,"not found, defaulting to None")
+                return None
+        
+    @classmethod
+    def set_value(cls,key,val):
+        if not type(key)==list:
+            key=[key]
+        build=cls.data
+        for sub_dict_key in key:
+            build=build[sub_dict_key]
+        build.value=val
+        log.debug("Key",key,"set to",val)
+        new_val=cls.get_value(key)
+        if new_val != val:
+            log.warning("New value", val, "was not set. Value of",key,"is",new_val)
+        cls.save()
+        
+    @classmethod
+    def save(cls):
+        log.debug("Change made to settings, saving", cls.filename)
+        files.write_file(cls.filename,cls.data.dumps())
+
 class speak:
     @classmethod
     def init(cls):
@@ -258,111 +324,93 @@ class files:
     
     @classmethod
     def init(cls):
-        log.debug('Initalizing files...')
-        log.debug('Loading playlist...')
-        cls.playlist=cls.load_file('playlist', '')
-        if type(cls.playlist)!=list:
-            cls.playlist=[]
-        log.debug('Playlist has '+str(len(cls.playlist))+' items.')
-        log.debug('Loading name...')
-        cls.name=cls.load_file('name', 'human')
-        log.debug('Name is '+str(cls.name))
-        log.debug('Loading location...')
-        cls.location=cls.load_file('location', 'Null Island')
-        log.debug('Location is '+cls.location)
+        log.debug("Initalizing files")
+        log.debug("Not actually doing anything")
     
     @classmethod
-    def _nofile(cls, file, contents, use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        log.info('Data file', loc+file+'.txt', 'missing, creating...')
-        cls.write_file(file, contents, use_default)
+    def _nofile(cls, file, contents):
+        log.info('Data file', file, 'missing, creating...')
+        cls.write_file(file, contents)
     
     @classmethod
-    def write_file(cls, file, info, use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        with open(loc+file+'.txt', "w+") as data:
+    def write_file(cls, file, info):
+        #Convert str to text
+        if type(info)==list:
+            build=""
+            for ln in info:
+                build+=str(ln)
+            info=build
+            
+        with open(file, "w+") as data:
             data.write(info)
-            log.debug('Wrote "'+str(info)+'" to', loc+file+'.txt')
+            log.debug('Wrote "'+str(len(str(info)))+'" characters to', file)
     
     @classmethod
-    def load_file(cls, file, not_found='', use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
+    def load_file(cls, file, not_found='', convert_list=True,strip_lines=False):
         try:
-            contents=[]
-            with open(loc+file+'.txt') as data:
+            if convert_list:
+                contents=[]
+            else:
+                contents=""
+            with open(file) as data:
                 for each_line in data:
                     try:
-                        line=each_line.strip()
-                        if line!='':
-                            contents.append(line)
+                        if strip_lines:
+                            line=each_line.strip()
+                        else:
+                            line=each_line
+                        
+                        if convert_list:
+                            if line!='':
+                                contents.append(line)
+                        else:
+                            contents+=line
                     except ValueError:
                         log.exception("ValueError")
-                        pass
         except IOError:
-            cls._nofile(file, not_found, use_default)
+            log.warning("IOError while attempting to load file")
+            cls._nofile(file, not_found)
             contents=not_found
-        log.debug("Retrieved", len(contents), "lines from", loc+file+'.txt')
+        if convert_list:
+            log.debug("Retrieved", len(contents), "lines from", file)
+        else:
+            log.debug("Retrieved", len(contents), "characters from", file)
         if len(contents)==1:
             contents=contents[0]
         return contents
     
     @classmethod
-    def append_file(cls, file, info, use_default=True):
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
+    def append_file(cls, file, info):
         try:
-            with open(loc+file+'.txt', "a") as data:
+            with open(file, "a") as data:
                 data.write('\n'+str(info))
-                log.debug('Appended "'+str(info)+'" to', loc+file+'.txt')
+                log.debug('Appended "'+str(info)+'" to', file)
         except IOError:
-            cls._nofile(file, info, use_default)
+            cls._nofile(file, info)
 
     @classmethod
-    def item_exists(cls, name, use_default=True):
+    def item_exists(cls, name):
         #returns true if a file or directory with the given name exists
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        res=os.path.exists(loc+name)
-        log.debug("Path",loc+name,"exists:",res)
+        res=os.path.exists(name)
+        log.debug("Path",name,"exists:",res)
         return res
         
     @classmethod
-    def file_exists(cls, name, use_default=True):
-        if not cls.item_exists(name, use_default):
-            log.debug("Path",loc+name,"does not exist, file cannot exist")
+    def file_exists(cls, name):
+        if not cls.item_exists(name):
+            log.debug("Path",name,"does not exist, file cannot exist")
             return False
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        res=os.path.isfile(loc+name)
-        log.debug("File",loc+name,"exists:",res)
+        res=os.path.isfile(name)
+        log.debug("File",name,"exists:",res)
         return res
         
     @classmethod
-    def dir_exists(cls, name, use_default=True):
-        if not cls.item_exists(name, use_default):
-            log.debug("Path",loc+name,"does not exist, dir cannot exist")
+    def dir_exists(cls, name):
+        if not cls.item_exists(name):
+            log.debug("Path",name,"does not exist, dir cannot exist")
             return False
-        if use_default:
-            loc=cls.data_loc
-        else:
-            loc=""
-        res=os.path.isdir(loc+name)
-        log.debug("Dir",loc+name,"exists:",res)
+        res=os.path.isdir(name)
+        log.debug("Dir",name,"exists:",res)
         return res
 
 class volume:
@@ -370,7 +418,7 @@ class volume:
     def init(cls):
         log.debug('Loading volume...')
         log.debug('Getting current volume...')
-        cls.volume=cls._get_volume()
+        cls.volume=settings.get_value(['config','volume'])
         volume.update()
         log.debug('Volume is set to '+str(cls.volume))
     
@@ -381,10 +429,11 @@ class volume:
     
     @classmethod
     def change(cls, vol):
-        cls.volume=vol
-        log.debug('Volume: ', vol)
+        cls.volume=int(vol)
+        log.debug('Volume:', cls.volume)
+        settings.set_value(['config','volume'],cls.volume)
         cls.update()
-        speak.say('Volume set to', str(vol))
+        speak.say('Volume set to', str(cls.volume))
     
     @classmethod
     def _get_volume(cls):
@@ -405,15 +454,19 @@ class music:
     last_song=''
     playlist_item=0
     
-    #Save files to the ./music/ directory to enable faster playback. Set to false to disable saving.
-    save_files=True
-    #Convert files that are saved to mp3 format. Does nothing if file saving is disabled.
-    convert_to_mp3=True
+    
     
     @classmethod
     def init(cls):
         log.debug('Loading music...')
+        #Save files to the ./music/ directory to enable faster playback. Set to false to disable saving.
+        cls.save_files=settings.get_value(['music','save_music'])
         
+        #Convert files that are saved to mp3 format. Does nothing if file saving is disabled.
+        cls.convert_format=settings.get_value(['music','change_music_ext'])
+        cls.music_format=settings.get_value(['music','music_file_ext'])
+        
+        log.debug("Music settings: save_files=", str(cls.save_files)+", convert_format=",cls.convert_format)
         log.debug('Loading Youtube_DL')
         #Set Youtube DL options
         cls.ydl_opts={
@@ -425,12 +478,12 @@ class music:
             'restrict-filenames': True,
         }
         
-        if cls.save_files and cls.convert_to_mp3:
-            #This section saves the file as an .mp3.
-            cls.ydl_saving={'audio-format': 'mp3',
+        if cls.save_files and cls.convert_format:
+            #This section saves the file with a given format.
+            cls.ydl_saving={'audio-format': cls.music_format,
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
+                    'preferredcodec': cls.music_format,
                     'preferredquality': '192',
                 }],
             }
@@ -440,7 +493,9 @@ class music:
         #Prevents it from saying words like "opening parenthesis"
         cls.title_chars=list(string.ascii_letters)+list(range(0,9))+[' ']
         
-        cls._load_dicts()
+        log.debug("Loading song info dictionaries...")
+        cls.song_ids=settings.get_value(['music','song_ids'])
+        cls.song_terms=settings.get_value(['music','song_terms'])
         
         log.debug('Loading VLC...')
         cls.vlc_instance=vlc.get_default_instance()
@@ -473,10 +528,11 @@ class music:
                     log.warning("KeyboardInterrupt while searching for song")
                     raise
                     
-                except Exception:
+                except Exception.__class__.__name__:
                     #Error when song doesn't exist
-                    log.warning("Exception ocurred when searching for song:",Exception)
+                    log.critical("Exception ocurred when searching for song:",Exception)
                     meta=None
+                    raise
                     
                 if meta is None:
                     #Song doesn't exist
@@ -493,17 +549,19 @@ class music:
                     
                     title=cls._get_title_from_id(song_id)
                     
-                    if title is None or not files.file_exists('music/'+song_id+'.mp3',False):
+                    if title is None:
                         #Song exists but is not saved locally
                         if cls.save_files:
-                            log.debug("Song not downloaded, downloading...")
-                            speak.say("Downloading "+cls.cleanup_title(song_title))
-                            try:
-                                cls.download_music(song_url,song_id)
-                            except KeyboardInterrupt:
-                                log.debug("KeyboardInterrupt when downloading song")
-                                raise
-                            log.info("Finished downloading.")
+                            if not files.file_exists('music/'+song_id+"."+cls.music_format):
+                                #User might have reset config files but not deleted music
+                                log.debug("Song not downloaded, downloading...")
+                                speak.say("Downloading "+cls.cleanup_title(song_title))
+                                try:
+                                    cls.download_music(song_url,song_id)
+                                except KeyboardInterrupt:
+                                    log.debug("KeyboardInterrupt when downloading song")
+                                    raise
+                                log.info("Finished downloading.")
                             #Index title
                             title=song_title
                             cls.song_ids[song_id]=song_title
@@ -514,10 +572,9 @@ class music:
                             cls._stream_music(song_url)
                     
                     log.debug("Indexing search term")
-                    #Index the search term
+                    #Index the search term and save
                     cls.song_terms[search_term]=song_id
-                    #Save dicts to file
-                    cls._save_dicts()
+                    cls.save_music_config()
                     
             else:
                 title=cls._get_title_from_id(song_id)
@@ -540,11 +597,12 @@ class music:
                     log.warning("KeyboardInterrupt when playing song")
                     raise
                 
-                except:
-                    log.error("Error playing song:",sys.exc_info()[0])
+                except Exception as exception:
+                    log.critical("Error playing song:",exception.__class__.__name__)
                     speak.say('Sorry, there was an error')
                     cls.has_music=False
                     cls.playing=False
+                    raise
                 
             else:
                 log.debug("Can't find", search_term)
@@ -555,36 +613,19 @@ class music:
         
     @classmethod
     def _get_id_from_term(cls, term):
-        return cls.song_terms.get(term)
+        try:
+            return cls.song_terms.get(term)
+        except KeyError:
+            log.debug("KeyError getting song term")
+            return None
         
     @classmethod
     def _get_title_from_id(cls, song_id):
-        return cls.song_ids.get(song_id)
-        
-    @classmethod
-    def _save_dicts(cls):
-        log.debug("Saving song info dictionaries...")
-        files.write_file('song_ids',str(cls.song_ids))
-        files.write_file('song_terms',str(cls.song_terms))
-        
-    @classmethod
-    def _load_dicts(cls):
-        error=False
-        log.debug("Loading song info dictionaries...")
         try:
-            cls.song_ids=ast.literal_eval(files.load_file('song_ids',"{}"))
-        except:
-            cls.song_ids={}
-            error=True
-        try:
-            cls.song_terms=ast.literal_eval(files.load_file('song_terms',"{}"))
-        except:
-            cls.song_terms={}
-            error=True
-            
-        if error:
-            log.info("Error loading dictionaries, saving default values")
-            cls._save_dicts()
+            return cls.song_ids[song_id]
+        except KeyError:
+            log.debug("KeyError getting song id")
+            return None
         
     @classmethod
     def download_music(cls, url, song_name):
@@ -597,20 +638,19 @@ class music:
         except KeyboardInterrupt:
             log.warning("KeyboardInterrupt while downloading")
             raise
-        except:
-          log.error("Error downloading song:", sys.exc_info()[0])
+        except Exception as exception:
+          log.critical("Error downloading song:", exception.__class__.__name__)
+          raise
         
     @classmethod
     def _stream_music(cls, url):
-        #todo: implement this
         log.debug("Streaming music from url",url)
         cls.vlc_player.set_media(cls.vlc_instance.media_new(url))
     
     @classmethod
     def _play_from_file(cls, music_file):
-        #todo: check if this works
         log.debug("Playing music from file",music_file)
-        cls.vlc_player.set_media(cls.vlc_instance.media_new("music/"+music_file+".mp3"))
+        cls.vlc_player.set_media(cls.vlc_instance.media_new("music/"+music_file+"."+cls.music_format))
         
     @classmethod
     def cleanup_title(cls,title):
@@ -632,7 +672,7 @@ class music:
         else:
             cls.playlist_item+=1
             
-        next_song=files.playlist[cls.playlist_item]
+        next_song=settings.get_value(['music','playlists','my playlist'])[cls.playlist_item]
         log.info('Next song is', next_song)
         time.sleep(2)
         cls.find_music(next_song)
@@ -650,9 +690,15 @@ class music:
     
     @classmethod
     def pause(cls, paused=True):
-        log.debug("Paued:",paused)
+        log.debug("Paused:",paused)
         cls.vlc_player.set_pause(paused)
-    
+        
+    @classmethod
+    def save_music_config(cls):
+        log.debug("Saving song info")
+        settings.set_value(['music','song_ids'],cls.song_ids)
+        settings.set_value(['music','song_terms'],cls.song_terms)
+
 class btn:
     
     stage=0
@@ -685,7 +731,7 @@ class btn:
         if cls.stage > 0:
             cls.board.button.close()
             log.debug("Cleaned up button handler")
-        
+
 class record:
 
     callback=None
@@ -739,11 +785,9 @@ class recognize:
     
     @classmethod
     def init(cls,fname='houndify'):
-        log.debug('Loading Houndify credentials from file...')
-        file_data=files.load_file(fname, '') #credential location, should be stored as 2 lines: client ID and client key
-        assert file_data!='' #Credentials file is missing or empty
-        cls.HOUNDIFY_CLIENT_ID = file_data[0].replace("\n","") # Houndify client IDs are Base64-encoded strings
-        cls.HOUNDIFY_CLIENT_KEY = file_data[1].replace("\n","") # Houndify client keys are Base64-encoded strings
+        log.debug('Loading Houndify credentials from settings...')
+        cls.HOUNDIFY_CLIENT_ID = settings.get_value(['config','houndify_client_id'])
+        cls.HOUNDIFY_CLIENT_KEY = settings.get_value(['config','houndify_client_key'])
         #Create a new recognizer instance
         cls.r = sr.Recognizer()
     
@@ -752,7 +796,7 @@ class recognize:
         
         #Record what the user said
         file_name=record.new()
-        if files.file_exists(file_name,False):
+        if files.file_exists(file_name):
             lights.button_change('cyan')
             log.info("Interpreting speech...")
             
@@ -810,7 +854,7 @@ class hotword:
     def start(cls):
         cls.started=True
         log.debug("Starting detector")
-        cls.detector = snowboy.HotwordDetector(files.load_file('path_to_voice_model', './model.pmdl'), sensitivity=0.4, audio_gain=1)
+        cls.detector = snowboy.HotwordDetector(settings.get_value(['config','path_to_voice_model']), sensitivity=0.4, audio_gain=1)
         try:
             cls.detector.start(cls.detected_callback)
             log.debug("Detector running")
@@ -931,9 +975,10 @@ class main_thread:
         #Initalize packages that have been imported
         log.debug("Initalizing other classes")
         #lights.init() #This is called right after importing leds
+        settings.init()
+        volume.init()
         speak.init()
         files.init()
-        volume.init()
         music.init()
         btn.init()
         recognize.init()
@@ -987,16 +1032,16 @@ class main_thread:
                 speak.say("Sorry, I didn't hear you.")
                 log.debug("I didn't hear you. Please press the button and try again.")
             else:
-                main_thread.recognize(str(text).lower())
+                main_thread.recognize(str(text))
     
     @classmethod
     def starts(cls, text, beginning):
         return text.startswith(beginning)
     
     @classmethod
-    def recognize(cls, text):
+    def recognize(cls, text_preserve_case):
         #Interpret what the person said
-        
+        text=text_preserve_case.lower()
         if text=='power off' or text=='shut down':
             speak.say('Good bye!')
             lights.reset_led()
@@ -1022,11 +1067,12 @@ class main_thread:
         
         elif text in cls.greeting:
             greeting=random.choice(cls.greeting)
-            greeting=greeting+', '+files.name
+            greeting=greeting+', '+settings.get_value(['user_data','name'])
+            greeting=greeting[0].upper()+greeting[1:]
             speak.say(greeting)
         
         elif text=='what is my name' or text=="what's my name":
-            build_name=''.join(['Your name is ', files.name, '. You can change it by telling me to call you by a different name.'])
+            build_name=''.join(['Your name is ', settings.get_value(['user_data','name']), '. You can change it by telling me to call you by a different name.'])
             speak.say(build_name)
             
         elif text=='where am I' or text=='what is my location':
@@ -1047,12 +1093,12 @@ class main_thread:
                 speak.say('No song is playing.')
         
         elif text=='shuffle my playlist':
-            if files.playlist==[]:
+            if settings.get_value(['music','playlists','my playlist'])==[]:
                 speak.say("You don't have any songs on your playlist yet.")
             else:
                 log.error("Can't play playlists yet!")
                 #TODO
-                music.find_music(random.choice(files.playlist))
+                music.find_music(random.choice(settings.get_value(['music','playlists','my playlist'])))
         
         elif text=='pause' or text=='stop':
             if music.has_music==True and music.playing==True:
@@ -1064,7 +1110,6 @@ class main_thread:
         elif text=='resume' or text=='play' or text=='resume the song':
             if music.has_music==True and music.playing==False:
                 music.playing=True
-                speak.say('Okay')
         
         #Here, recognition of the string based on text.startswith('x') is allowed.
         
@@ -1073,7 +1118,7 @@ class main_thread:
         
         elif cls.starts(text, 'play '):
             if text=='play my playlist' or text=='play playlist':
-                if files.playlist==[]:
+                if settings.get_value(['music','playlists','my playlist'])==[]:
                     speak.say("You don't have any songs on your playlist yet.")
                 else:
                     log.error("Can't play playlists yet!")
@@ -1102,8 +1147,8 @@ class main_thread:
                         for num in vol.split():
                             if num!='':
                                 total+=int(num)
-                        vol=total
-                        if vol >=1 and vol <=100:
+                        vol=total #should already be int
+                        if vol >=0 and vol <=100:
                             volume.change(vol)
                         else:
                             speak.say('Please give a number from one to one hundred.')
@@ -1113,21 +1158,19 @@ class main_thread:
                     
         elif cls.starts(text, 'call me'):
             if text=='call me':
-                build_name='Your name is '+files.name+'. You can change it by saying call me, followed by your name.'
+                build_name='Your name is '+settings.get_value(['user_data','name'])+'. You can change it by saying call me, followed by your name.'
                 speak.say(build_name)
             else:
                 text=text.replace('call me ', '')
-                files.write_file('name', text)
-                files.name=text
+                settings.set_value(['user_data','name'],text)
                 log.debug('Name changed to', text)
                 speak.say(random.choice(cls.greeting), text)
         
         elif cls.starts(text, 'set my location to ') or cls.starts(text, 'change my location to '):
             text=text.replace('set my loaction to ', '')
             text=text.replace('change my location to ', '')
-            files.write_file('location', text)
-            files.location=text
-            speak.say("Your location has been set to", files.location)
+            settings.set_value(['user_data','location'],text)
+            speak.say("Your location has been set to", text)
         
         #After this point, efforts to recognize the string by items in the substring are allowed.
         #They are not allowed above in case someone says "play sounds of weather" or "simon says my playlist can add"
@@ -1137,24 +1180,28 @@ class main_thread:
             percent_chance=random.randint(1,101)
             percent_chance=str(percent_chance)
             future_weather=random.choice(cls.future_weather)
-            build_weather=' '.join(['Right now, in', files.location, 'it is', current_weather, 'with a', percent_chance, 'percent chance of', future_weather])
+            build_weather=' '.join(['Right now, in', settings.get_value(['user_data','location']), 'it is', current_weather, 'with a', percent_chance, 'percent chance of', future_weather])
             speak.say(build_weather)
         
         elif 'add' in text and 'playlist' in text:
             if music.last_song=='':
                 speak.say('You have not played a song recently')
             else:
-                if files.playlist==[]:
-                    files.write_file('playlist', music.last_song)
-                else:
-                    files.append_file('playlist', music.last_song)
+                settings_query=['music','playlists','my playlist']
+                pl=copy.deepcopy(settings.get_value(settings_query))
+                pl.append(music.last_song)
+                settings.set_value(settings_query, pl)
                 build_added_song=' '.join(["I've added", music.last_song, 'to your playlist'])
                 speak.say(build_added_song)
         
         #No command was recognized
         else:
             speak.say("Sorry, I don't know what you just said.")
-            files.append_file("unknown_responses", text)
+            settings_query=['other','unknown_commands']
+            unknown_commands=settings.get_value(settings_query)
+            if not text in unknown_commands:
+                unknown_commands.append(text)
+                settings.set_value(settings_query,unknown_commands)
             
         #Unpause music
         if music.playing==True and music.has_music==True and cls.keep_running:
@@ -1199,7 +1246,6 @@ audio=imp('aiy.voice.audio')
 AudioFormat=audio.AudioFormat
 record_file=audio.record_file
 del audio
-#TODO: Implement aiy.voice.audio.play_wav in the future
 
 #Import for playing songs:
 vlc=imp('vlc')
@@ -1207,6 +1253,7 @@ string=imp('string')
 sys=imp('sys')
 ast=imp('ast')
 youtube_dl=imp('youtube_dl')
+bespon=imp('bespon')
 
 log.info('Packages imported. Initalizing...')
 
@@ -1220,8 +1267,8 @@ if __name__=='__main__':
         main_thread.run()
     except KeyboardInterrupt:
         log.warning("KeyboardInterrupt detected")
-    except:
-        log.critical("Unexpected error")
+    except Exception as exception:
+        log.critical(exception.__class__.__name__)
         raise
     finally:
         lights.reset_led()
