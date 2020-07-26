@@ -1,0 +1,39 @@
+#Commands:
+
+# Move to the directory with the .service file
+#cd ~/recognizer/recognizer_service
+
+# Create the symlink
+#sudo ln -s `pwd`/recognizer.service /lib/systemd/system
+
+# Reload the service files so the system knows about this new one
+#sudo systemctl daemon-reload
+
+
+#sudo systemctl enable recognizer.service
+
+#sudo service recognizer start
+
+# Show program logs
+#sudo journalctl -u recognizer -f
+
+
+###########################################
+
+[Unit]
+Description=AIY Assistant
+Wants=network-online.target
+After=network-online.target
+Wants=systemd-timesyncd.service
+After=systemd-timesyncd.service
+
+[Service]
+Environment=DISPLAY=:0
+Type=simple
+Restart=always
+User=pi
+ExecStart=/usr/bin/python3 -u /home/pi/AIY-projects-python/src/AIY_Assistant/service_handler.py
+WorkingDirectory=/home/pi/AIY-projects-python/src/AIY_Assistant/
+
+[Install]
+WantedBy=multi-user.target
