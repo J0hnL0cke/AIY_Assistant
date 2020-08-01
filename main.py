@@ -453,8 +453,7 @@ class music:
     is_playlist=False
     last_song=''
     playlist_item=0
-    
-    
+    playlist=[]
     
     @classmethod
     def init(cls):
@@ -663,6 +662,11 @@ class music:
         return res
     
     @classmethod
+    def create_playlist(cls,songs):
+        cls.playlist=songs
+        cls.play_multiple(True)
+    
+    @classmethod
     def play_multiple(cls, reset=False):
         log.info('Loading the song')
         if reset:
@@ -672,9 +676,10 @@ class music:
         else:
             cls.playlist_item+=1
             
-        next_song=settings.get_value(['music','playlists','my playlist'])[cls.playlist_item]
+        next_song=cls.playlist[cls.playlist_item]
         log.info('Next song is', next_song)
-        time.sleep(2)
+        #Is this necessary?
+        #time.sleep(2)
         cls.find_music(next_song)
     
     @classmethod
@@ -1094,14 +1099,6 @@ class main_thread:
                 log.debug('No song is currently playing.')
                 speak.say('No song is playing.')
         
-        elif text=='shuffle my playlist':
-            if settings.get_value(['music','playlists','my playlist'])==[]:
-                speak.say("You don't have any songs on your playlist yet.")
-            else:
-                log.error("Can't play playlists yet!")
-                #TODO
-                music.find_music(random.choice(settings.get_value(['music','playlists','my playlist'])))
-        
         elif text=='pause' or text=='stop':
             if music.has_music==True and music.playing==True:
                 #pause song in case command was given on the console
@@ -1118,18 +1115,33 @@ class main_thread:
         elif cls.starts(text, 'simon says '):
             speak.say(text.replace('simon says ', ''))
         
-        elif cls.starts(text, 'play '):
-            if text=='play my playlist' or text=='play playlist':
+        elif cls.starts(text, 'play'):
+            if text=='play':
                 if settings.get_value(['music','playlists','my playlist'])==[]:
-                    speak.say("You don't have any songs on your playlist yet.")
+                    speak.say("You don't have any songs on "+text.replace('my','your')+' playlist yet.')
                 else:
-                    log.error("Can't play playlists yet!")
+                    text.replace('play ','')
                     speak.say('Playing your playlist')
                     music.play_multiple(True)
             else:
-                music.has_music=False
-                music.playing=False
-                music.find_music(text.replace('play ', '', 1))
+                text.replace('play','')
+                if text in settings.get_value(['music','playlists']):
+                    speak.say("Playing "+text.replace('my','your')+' playlist')
+                    ordered_playist=settings.get_value(['music','playlists',text])
+                    music.create_playlist(ordered_playist)
+                else:
+                    music.has_music=False
+                    music.playing=False
+                    music.find_music(text.replace('play ', '', 1))
+                
+        elif text.startswith('shuffle '):
+            text.replace('shuffle ','')
+            if settings.get_value(['music','playlists',text])==[]:
+                speak.say("You don't have any songs on "+text.replace('my','your')+' playlist yet.')
+            else:
+                speak.say("Shuffling "+text.replace('my','your'))
+                ordered_playist=settings.get_value(['music','playlists',text])
+                music.create_playlist(random.shuffle(ordered_playist))
         
         elif cls.starts(text, 'volume'):
             if text=='volume':
@@ -1185,16 +1197,25 @@ class main_thread:
             build_weather=' '.join(['Right now, in', settings.get_value(['user_data','location']), 'it is', current_weather, 'with a', percent_chance, 'percent chance of', future_weather])
             speak.say(build_weather)
         
-        elif 'add' in text and 'playlist' in text:
+        elif text.startswith('add ') and ' to ' in text:
+            text.replace('add ','')
             if music.last_song=='':
                 speak.say('You have not played a song recently')
             else:
-                settings_query=['music','playlists','my playlist']
-                pl=copy.deepcopy(settings.get_value(settings_query))
-                pl.append(music.last_song)
-                settings.set_value(settings_query, pl)
-                build_added_song=' '.join(["I've added", music.last_song, 'to your playlist'])
-                speak.say(build_added_song)
+                #Get playlist name
+                item=text.split(' to ')
+                item=item[len(items)-1]
+                
+                if item in settings.get_value('music','playlists'):
+                    settings_query=['music','playlists',item]
+                    pl=copy.deepcopy(settings.get_value(settings_query))
+                    pl.append(music.last_song)
+                    settings.set_value(settings_query, pl)
+                    build_added_song=' '.join(["I've added", music.last_song, 'to your playlist'])
+                    speak.say(build_added_song)
+                else:
+                    log.debug("No such playlist exists")
+                    speak.say("You don't have a playlist called "+playlist)
         
         #No command was recognized
         else:
