@@ -226,7 +226,7 @@ class settings:
 class speak:
     @classmethod
     def init(cls):
-        log.debug('Initalizing voice...')
+        log.debug('Initializing voice...')
         cls.engine = tts.init()
         
         #Should customize voice properties
@@ -258,18 +258,18 @@ class lights:
             #This should provide some delay to allow the Leds() package to initialize.
             
             cls.led_inst=None
-            log.warning("Couldn't initalize leds")
+            log.warning("Couldn't initialize leds")
     
     @classmethod
     def init(cls):
         #Have to set this after importing aiy.leds, cannot go in class body
-        cls.colors=['off', leds.Color.CYAN, leds.Color.WHITE, leds.Color.PURPLE, leds.Color.YELLOW, leds.Color.BLUE, leds.Color.GREEN, Color.RED]
+        cls.colors=['off', leds.Color.CYAN, leds.Color.WHITE, leds.Color.PURPLE, leds.Color.YELLOW, leds.Color.BLUE, leds.Color.GREEN, leds.Color.RED]
         cls.names=['off', 'cyan', 'white', 'purple', 'yellow', 'blue', 'green', 'red']
         
-        log.debug('Initalizing status light...')
+        log.debug('Initializing status light...')
         #cls.status_ui=aiy.voicehat.get_status_ui()
         #TODO: keep or remove?
-        log.debug('Initalizing leds...')
+        log.debug('Initializing leds...')
         cls._get_led_inst()
         log.debug('Setting LED...')
         cls.button_change('purple')
@@ -281,7 +281,7 @@ class lights:
     
     @classmethod
     def button_change(cls, c):
-        #Try to initalize if instance doesn't exist
+        #Try to initialize if instance doesn't exist
         if cls.led_inst is None:
             log.debug("Trying to create an LED instance")
             cls._get_led_inst()
@@ -299,7 +299,7 @@ class lights:
                 cls.led_inst.update(leds.Leds.rgb_on(color))
             cls.current_color=color
         else:
-            log.error("Cannot change led color: Leds() not yet initalized.")
+            log.error("Cannot change led color: Leds() not yet initialized.")
         
     @classmethod
     def reset_led(cls):
@@ -324,7 +324,7 @@ class files:
     
     @classmethod
     def init(cls):
-        log.debug("Initalizing files")
+        log.debug("Initializing files")
         log.debug("Not actually doing anything")
     
     @classmethod
@@ -343,7 +343,7 @@ class files:
             
         with open(file, "w+") as data:
             data.write(info)
-            log.debug('Wrote "'+str(len(str(info)))+'" characters to', file)
+            log.debug('Wrote '+str(len(str(info)))+' characters to', file)
     
     @classmethod
     def load_file(cls, file, not_found='', convert_list=True,strip_lines=False):
@@ -705,7 +705,7 @@ class btn:
     
     @classmethod
     def init(cls):
-        log.debug('Initalizing button...')
+        log.debug('Initializing button...')
         cls.board=aiy_board.Board()
         cls.stage=1
     
@@ -937,6 +937,8 @@ class trigger:
         except KeyboardInterrupt:
             log.debug("KeyboardInterrupt while waiting for input, raising interrupt...")
             raise
+        except EOFError:
+            log.warning("EOFError checking input. Program may be running as service, which does not accept keyboard input")
     
     @classmethod
     def getNextCommand(cls):
@@ -961,7 +963,7 @@ class main_thread:
     @classmethod
     def init(cls):
         
-        log.debug('Initalizing main...')
+        log.debug('Initializing main...')
         
         #Set class variables that will be used to recognize the intent of a speaker
         
@@ -972,8 +974,8 @@ class main_thread:
         cls.current_weather=['sunny', 'cloudy', 'stormy', 'foggy', 'snowing', 'sleeting', 'hailing', 'windy', 'humid']
         cls.future_weather=['rain', 'thunder and lightning', 'clouds', 'increased humidity', 'high winds', 'fog', 'storms', 'hail', 'sleet', 'tornado', 'snow', 'solar flare', 'tsunami', 'zombie apocalypse', 'raining tacos', 'wildfire', 'avalanche', 'sand storms', 'drought']
         
-        #Initalize packages that have been imported
-        log.debug("Initalizing other classes")
+        #Initialize packages that have been imported
+        log.debug("Initializing other classes")
         #lights.init() #This is called right after importing leds
         settings.init()
         volume.init()
@@ -993,7 +995,7 @@ class main_thread:
     @classmethod
     def run(cls):
         
-        #Packages must have been imported and initalized before use, return an error otherwise
+        #Packages must have been imported and initialized before use, return an error otherwise
         assert cls.initialized
         
         lights.button_change('green')
@@ -1212,7 +1214,7 @@ class main_thread:
 """IMPORT PACKAGES"""
 
 
-#Initalize logging
+#Initialize logging
 import inspect
 import copy
 log.init()
@@ -1224,7 +1226,7 @@ log.debug("Importing importlib...")
 import importlib
 
 leds=imp('aiy.leds')
-#Initalize button light to let the user know the program is loading
+#Initialize button light to let the user know the program is loading
 Color=leds.Color
 lights.init()
 
@@ -1255,15 +1257,15 @@ ast=imp('ast')
 youtube_dl=imp('youtube_dl')
 bespon=imp('bespon')
 
-log.info('Packages imported. Initalizing...')
+log.info('Packages imported. Initializing...')
 
 
-#Initalizes and then runs main thread
+#Initializes and then runs main thread
 
 if __name__=='__main__':
     try:
         main_thread.init()
-        log.info('Done initalizing. Running...')
+        log.info('Done initializing. Running...')
         main_thread.run()
     except KeyboardInterrupt:
         log.warning("KeyboardInterrupt detected")
@@ -1273,6 +1275,7 @@ if __name__=='__main__':
     finally:
         lights.reset_led()
         btn.clean_up()
+        sys.exit()
         
 else:
-    log.debug('Done initalizing.')
+    log.debug('Done initializing.')

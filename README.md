@@ -72,10 +72,36 @@ When you are asked to enter a path to your Snowboy model, you can use a relative
 
 `cd` into the repository if not already in it
 
-run `python3 main.py`
+Run `python3 main.py`
+
+You can enter commands by pressing the button and speaking or by entering text in the shell and pressing the enter key.
+
+Press `Ctrl+C` to exit and close the program
 
 You should be good to go. If you have an issue, report it [here](https://github.com/J0hnL0cke/AIY_Assistant/issues/new)
 
+**Start at boot**
+
+There is a .service file included in this repo if you want to run the assistant at startup. To enable it, run the following commands in a shell:
+
+  Create the symlink
+  `sudo ln -s ``pwd``/assistant.service /lib/systemd/system`
+
+  Reload the service files so the system knows about this new one
+  `sudo systemctl daemon-reload`
+
+  Enable the program to run at boot
+  `sudo systemctl enable assistant.service`
+
+Now, you can start the program manually or reboot, and the code in service_assistant.py will start. Pressing the button on the AIY will then start the assistant.
+
+Start the program manually
+`sudo service assistant start`
+
+Show program logs
+`sudo journalctl -u assistant -f`
+
+Unfortunately, there is no way to provide keyboard input to the assistant while it is running as a service, so you can only provide commands using voice recognition.
 
 **Contribute**
 

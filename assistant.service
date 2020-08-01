@@ -1,0 +1,37 @@
+#Commands:
+
+# Create the symlink
+#sudo ln -s `pwd`/assistant.service /lib/systemd/system
+
+# Reload the service files so the system knows about this new one
+#sudo systemctl daemon-reload
+
+#Enable the program to run at boot
+#sudo systemctl enable assistant.service
+
+#Start the program
+#sudo service assistant start
+
+# Show program logs
+#sudo journalctl -u assistant -f
+
+
+###########################################
+
+[Unit]
+Description=AIY Assistant
+Wants=network-online.target
+After=network-online.target
+Wants=systemd-timesyncd.service
+After=systemd-timesyncd.service
+
+[Service]
+Environment=DISPLAY=:0
+Type=simple
+Restart=always
+User=pi
+ExecStart=/usr/bin/python3 -u /home/pi/AIY-projects-python/src/AIY_Assistant/service_handler.py
+WorkingDirectory=/home/pi/AIY-projects-python/src/AIY_Assistant/
+
+[Install]
+WantedBy=multi-user.target
