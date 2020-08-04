@@ -714,13 +714,17 @@ class music:
         log.debug('Playlist:', cls.is_playlist, 'loop:', cls.loop)
         
         if cls.is_playlist:
-            if cls.playlist_item==len(playlist):
+            if cls.playlist_item==len(cls.playlist)-1:
                 log.debug('Playlist done')
                 if cls.loop:
                     #Playlist finished, loop is on
                     log.info("Playlist finished. Loop is on, restarting playlist")
                     cls.play_multiple(True)
-                    
+                else:
+                    cls.playing=False
+                    cls.playlist=[]
+                    cls.is_playlist=False
+                
             else:
                 log.debug('Song done, continuing playlist')
                 cls.play_multiple()
@@ -1155,7 +1159,7 @@ class main_thread:
             else:
                 speak.say("There is no song playing.")
                 
-        elif text=='next' or text=='next song':
+        elif text=='next' or text=='next song' or text=='skip' or text=='skip this song':
             if music.has_music and music.playing and music.playlist!=[]:
                 music.next_playlist_song()
             else:
