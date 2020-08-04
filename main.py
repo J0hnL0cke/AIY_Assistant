@@ -183,6 +183,7 @@ class settings:
     @classmethod
     def get_value(cls,key,not_found=None,create_key=False):
         if type(key)!=list:
+            log.debug("Key",key,"is not a list, converting to list")
             key=[key]
         sub_dict=None
         for k in key:
@@ -1267,20 +1268,20 @@ class main_thread:
         
         elif cls.starts(text,'add ') and ' to ' in text:
             text.replace('add ','',1)
-            if music.last_song=='':
-                speak.say('You have not played a song recently')
-            else:
+            if music.has_music:
                 #Get playlist name
                 item=text.split('to ')
                 item=item[len(items)-1]
-                
-                if item in settings.get_value('music','playlists'):
+                log.debug("playlist name:",item)
+                if item in settings.get_value(['music','playlists']):
                     music.add_to_playlist(item,music.last_song)
                     build_added_song=' '.join(["I've added", music.last_song, 'to your playlist'])
                     speak.say(build_added_song)
                 else:
                     log.debug("No such playlist exists")
-                    speak.say("You don't have a playlist called "+playlist)
+                    speak.say("You don't have a playlist called "+item)
+            else:
+                speak.say('You have not played a song recently')
         
         #No command was recognized
         else:
