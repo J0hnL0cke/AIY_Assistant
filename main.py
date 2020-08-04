@@ -1365,8 +1365,10 @@ if __name__=='__main__':
     except KeyboardInterrupt:
         log.warning("KeyboardInterrupt detected")
     except Exception as exc:
-        log.critical(traceback.format_exc())
+        log.debug("Exception:",exc)
         err=True
+        log.critical(traceback.format_exc())
+        
     finally:
         lights.reset_led()
         btn.clean_up()
