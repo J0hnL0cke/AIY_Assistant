@@ -1,4 +1,4 @@
-### BespON format: see bespon.org for details and bespon.org/spec_overview for syntax. Keep in mind: in BespON, indentation matters. ###
+### BespON formata see bespon.org for details and bespon.org/spec_overview for syntax. Keep in mind: in BespON, indentation matters. ###
 
 config=
     
@@ -7,9 +7,9 @@ config=
     #That was a joke
     
     volume = 50 #speaker volume
-    path_to_voice_model = `./model.pmdl` #path to your snowboy voice model
-    houndify_client_id = null #Replace these with the respective ids, quoted with backticks
-    houndify_client_key = null
+    path_to_voice_model = `./Ok_Box.pmdl` #path to your snowboy voice model
+    houndify_client_id = `23W609bLVIaVxrDVYhgKvA==` #Replace these with the respective ids, quoted with backticks
+    houndify_client_key = `3P4qonuGxr1keANZPForCTjmU2uFux9wVHl8WU2rAUy_Ot4Y3SeLXpTnBUeeeYmvkz3GHu7OLUOZkLHHsXZqjA==`
   
 logging =
     
@@ -21,8 +21,8 @@ logging =
 
 user_data =
     
-    name = Human
-    location = `Null Island`
+    name = `filthy undeserving peasant`
+    location = `Area 51`
 
 music =
     
@@ -31,14 +31,17 @@ music =
     music_file_ext = mp3 #What file extension to save music as
     
     playlists =
-        `my playlist` = [] #video ids
+        `my library` = [] #All new songs are added to this playlist
+        `my playlist` = [] #Example playlist
         #other playlists can be added here
     
     song_ids =
-        null = null #song id = song title pairs
+        {`nYCURBSSyXw`= `Owl City - Verge ft. Aloe Blacc (Official Music Video)`, `ZP95wwpOm9s`= `Owl City - Verge ft. Aloe Blacc (Official Lyric Video)`, `GvSCM_VH-SY`= `Buzzin' Feat. Sollux (Homestuck Animation)`, `R8hRloOzeBg`= `The Bro Duet - Davejohn / Johndave - animatic`, `hBAuIzZttP4`= `Letter A Song`, `lb76XWttOnI`= `Homestuck Adventure Game Trailer`, `kWRbQ11HGvM`= `I Can't Decide (Dream Team + Badboyhalo)`, `PVjiKRfKpPI`= `Hozier - Take Me To Church (Official Video)`, `NM53vEiNMeI`= `Bastille  |  Blame [Lyrics]`, `zxJCMOMx550`= `Bastille - Glory (Official Video)`, `HerfW8Z18-M`= `Power`, `ZCTDKLjdok4`= `Bastille - Of The Night (Official Music Video)`, `1E36WU9Wzf4`= `Bastille - Flaws (Official Music Video)`, `8Y6raDtv0fc`= `Locked Away Lyrics - Adam Levine & R. City`, `7GjiXnnmJDs`= `Cooler than me Lyrics`, `mGv0ze0lHKA`= `Imagine Dragons - Nothing Left To Say (Art Film)`, `m9We2XsVZfc`= `Original GhostBusters Theme Song`, `A5JaxMaCIw4`= `BASTILLE - Icarus Lyrics`}
+        #song id = song title pairs
     
     song_terms =
-        null = null #search term = song id pairs
+        {`buzzing`= `GvSCM_VH-SY`, `bro duet`= `R8hRloOzeBg`, `a song`= `hBAuIzZttP4`, `johndave bro duet`= `R8hRloOzeBg`, `homestuck kickstarter trailer`= `lb76XWttOnI`, `dream animatic i can't decide`= `kWRbQ11HGvM`, `take me to church`= `PVjiKRfKpPI`, `bastille blame`= `NM53vEiNMeI`, `bastille glory`= `zxJCMOMx550`, `bastille power`= `HerfW8Z18-M`, `bastille rythm of the night`= `ZCTDKLjdok4`, `bastille flaws`= `1E36WU9Wzf4`, `locked away lyrics`= `8Y6raDtv0fc`, `glory bastille`= `zxJCMOMx550`, `cooler than me lyrics`= `7GjiXnnmJDs`, `flaws bastille`= `1E36WU9Wzf4`, `nothing left to say now`= `mGv0ze0lHKA`, `ghostbusters`= `m9We2XsVZfc`, `icarus bastille`= `A5JaxMaCIw4`}
+        #search term = song id pairs
 
 other=
     unknown_commands = [] #commands the recognizer didn't understand
