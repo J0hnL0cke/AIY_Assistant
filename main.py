@@ -178,13 +178,17 @@ class settings:
         cls.data=parsed_settings
     
     @classmethod
-    def get_value(cls,key,not_found=None):
+    def get_value(cls,key,not_found=None,create_key=False):
         if type(key)!=list:
             key=[key]
         sub_dict=None
         for k in key:
             sub_dict=cls._get_val(k,not_found,sub_dict)
+            if sub_dict==None:
+                break
         if not sub_dict==None:
+            if create:
+                cls.set_value(key,val)
             return sub_dict.value
         else:
             return None
