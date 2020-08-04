@@ -525,7 +525,7 @@ class music:
             
             if song_id is None:
                 log.debug("Song not found in index, searching Youtube...")
-                speak.say("Searching for "+search_term)
+                speak.say("Searching for "+cls.cleanup_title(search_term))
                 #Song isn't indexed, search YT
                 try:
                     with youtube_dl.YoutubeDL(cls.ydl_opts) as ydl:
@@ -572,6 +572,7 @@ class music:
                             #Index title
                             title=song_title
                             cls.song_ids[song_id]=song_title
+                            cls.song_terms[song_title]=song_id
                             
                         else:
                             log.debug("Song not downloaded, save_files is set to False")
