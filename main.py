@@ -1364,7 +1364,7 @@ if __name__=='__main__':
         main_thread.run()
     except KeyboardInterrupt:
         log.warning("KeyboardInterrupt detected")
-    except:
+    except Exception as exc:
         log.critical(traceback.format_exc())
         err=True
     finally:
