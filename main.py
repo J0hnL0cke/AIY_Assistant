@@ -1294,6 +1294,8 @@ log.info("Importing packages...")
 log.debug("Importing importlib...")
 import importlib
 
+traceback=imp('traceback')
+
 leds=imp('aiy.leds')
 #Initialize button light to let the user know the program is loading
 Color=leds.Color
