@@ -18,7 +18,7 @@ class log:
         'CRITICAL': YELLOW,
         'ERROR': RED
     }
-    errNames=["KeyboardInterrupt","ValueError","IOError","AttributeError","UnexpectedEOF","ParseError","KeyError","TypeError","AssertionError"]
+    errNames=["KeyboardInterrupt","ValueError","IOError","AttributeError","UnexpectedEOF","ParseError","KeyError","TypeError","AssertionError","NameError"]
     errColor=MAGENTA
 
     @classmethod
@@ -58,25 +58,28 @@ class log:
         
         if lvl!=logging.DEBUG and lvl!=logging.INFO:
             
-            #get info about the method that called the log
-            callerframerecord = inspect.stack()[2]
-            frame = callerframerecord[0]
-            info = inspect.getframeinfo(frame)
-            try:
-                filename=info.filename
-                function=info.function
-                line=info.lineno
-            finally:
-                del info
-                del frame
+            #If the log contains a traceback, don't bother getting extra info about the caller
+            if not log_dict["msg"].startswith("Traceback (most recent call last):"):
+                #get info about the method that called the log
+                callerframerecord = inspect.stack()[2]
+                frame = callerframerecord[0]
+                info = inspect.getframeinfo(frame)
+                try:
+                    filename=info.filename
+                    function=info.function
+                    line=info.lineno
+                finally:
+                    del info
+                    del frame
+                
+                #Set levelname
             
-            #Set levelname
-        
-            #Build the log
-            more_info={
-                "lineno": line,
-                "funcName": function,
-            }
+                #Build the log
+                more_info={
+                    "lineno": line,
+                    "funcName": function,
+                }
+                
             log_dict.update(more_info)
         
         #Log the event
