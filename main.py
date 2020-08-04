@@ -121,6 +121,10 @@ class log:
     @classmethod
     def critical(cls,*text):
         cls._make_record(text,logging.CRITICAL)
+        
+    @classmethod
+    def clean_up(cls):
+        logging.shutdown()
     
 class log_console_formatter(logging.Formatter):
 
@@ -1360,11 +1364,11 @@ if __name__=='__main__':
     except KeyboardInterrupt:
         log.warning("KeyboardInterrupt detected")
     except:
-        log.critical(exception.__class__.__name__)
         log.critical(traceback.format_exc())
     finally:
         lights.reset_led()
         btn.clean_up()
+        log.clean_up()
         sys.exit()
         
 else:
