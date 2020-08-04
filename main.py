@@ -536,9 +536,9 @@ class music:
                     log.warning("KeyboardInterrupt while searching for song")
                     raise
                     
-                except Exception.__class__.__name__:
+                except:
                     #Error when song doesn't exist
-                    log.critical("Exception ocurred when searching for song:",Exception)
+                    log.critical("Exception ocurred when searching for song")
                     meta=None
                     raise
                     
@@ -607,8 +607,8 @@ class music:
                     log.warning("KeyboardInterrupt when playing song")
                     raise
                 
-                except Exception as exception:
-                    log.critical("Error playing song:",exception.__class__.__name__)
+                except:
+                    log.critical("Error playing song")
                     speak.say('Sorry, there was an error')
                     cls.has_music=False
                     cls.playing=False
@@ -648,8 +648,8 @@ class music:
         except KeyboardInterrupt:
             log.warning("KeyboardInterrupt while downloading")
             raise
-        except Exception as exception:
-          log.critical("Error downloading song:", exception.__class__.__name__)
+        except:
+          log.critical("Error downloading song")
           raise
         
     @classmethod
@@ -1271,7 +1271,7 @@ class main_thread:
             if music.has_music:
                 #Get playlist name
                 item=text.split('to ')
-                item=item[len(items)-1]
+                item=item[len(item)-1]
                 log.debug("playlist name:",item)
                 if item in settings.get_value(['music','playlists']):
                     music.add_to_playlist(item,music.last_song)
@@ -1289,8 +1289,9 @@ class main_thread:
             settings_query=['other','unknown_commands']
             unknown_commands=settings.get_value(settings_query)
             if not text in unknown_commands:
-                unknown_commands.append(text)
-                settings.set_value(settings_query,unknown_commands)
+                uc=copy.deepcopy(unknown_commands)
+                uc.append(text)
+                settings.set_value(settings_query,uc)
             
         #Unpause music
         if music.playing and music.has_music and cls.keep_running:
@@ -1359,6 +1360,7 @@ if __name__=='__main__':
     except KeyboardInterrupt:
         log.warning("KeyboardInterrupt detected")
     except:
+        log.critical(exception.__class__.__name__)
         log.critical(traceback.format_exc())
     finally:
         lights.reset_led()
