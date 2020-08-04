@@ -1169,7 +1169,7 @@ class main_thread:
             if music.has_music and music.playing and music.playlist!=[]:
                 music.next_playlist_song()
             else:
-                aiy.say("There is no playlist playing")
+                speak.say("There is no playlist playing")
         
         #Here, recognition of the string based on cls.starts(text,'x') is allowed.
         
