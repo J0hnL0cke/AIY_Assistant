@@ -1120,8 +1120,11 @@ class main_thread:
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':
-            if music.has_music==True and music.playing==False:
-                music.playing=True
+            if music.has_music==True:
+                if music.playing==False:
+                    music.playing=True
+            else:
+                speak.say("There is no song playing.")
         
         #Here, recognition of the string based on cls.starts(text,'x') is allowed.
         
