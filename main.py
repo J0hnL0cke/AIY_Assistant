@@ -454,6 +454,7 @@ class music:
     last_song=''
     playlist_item=0
     playlist=[]
+    loop=False
     
     @classmethod
     def init(cls):
@@ -699,13 +700,24 @@ class music:
     @classmethod
     def _song_finished(cls, *args, **kwargs):
         log.info('Song finished')
-        log.debug('Playlist:', cls.is_playlist)
-        if cls.is_playlist==True:
+        log.debug('Playlist:', cls.is_playlist, 'loop:', cls.loop)
+        
+        if cls.is_playlist:
             if cls.playlist_item==len(playlist):
                 log.debug('Playlist done')
+                if cls.loop:
+                    #Playlist finished, loop is on
+                    log.info("Playlist finished. Loop is on, restarting playlist")
+                    cls.play_multiple(True)
+                    
             else:
                 log.debug('Song done, continuing playlist')
                 cls.play_multiple()
+        elif cls.loop:
+            #Loop is on, one song played
+            log.info("Loop mode is on, replaying song")
+            cls.find_music(cls.last_song)
+            
     
     @classmethod
     def pause(cls, paused=True):
@@ -1112,16 +1124,23 @@ class main_thread:
                 log.debug('No song is currently playing.')
                 speak.say('No song is playing.')
         
+        elif text=='loop':
+            if music.loop:
+                speak.say("Loop mode off")
+            else:
+                speak.say("Loop mode on")
+            music.loop=not music.loop
+        
         elif text=='pause' or text=='stop':
-            if music.has_music==True and music.playing==True:
+            if music.has_music and music.playing:
                 #pause song in case command was given on the console
                 music.playing=False
                 music.pause(True)
                 speak.say('Song paused')
         
         elif text=='resume' or text=='play' or text=='resume the song':
-            if music.has_music==True:
-                if music.playing==False:
+            if music.has_music:
+                if not music.playing:
                     music.playing=True
             else:
                 speak.say("There is no song playing.")
@@ -1252,7 +1271,7 @@ class main_thread:
                 settings.set_value(settings_query,unknown_commands)
             
         #Unpause music
-        if music.playing==True and music.has_music==True and cls.keep_running:
+        if music.playing and music.has_music and cls.keep_running:
             music.pause(False)
             log.debug('Finished responding to query. Playing song...')
 
