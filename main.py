@@ -1357,6 +1357,7 @@ log.info('Packages imported. Initializing...')
 #Initializes and then runs main thread
 
 if __name__=='__main__':
+    err=False
     try:
         main_thread.init()
         log.info('Done initializing. Running...')
@@ -1365,11 +1366,13 @@ if __name__=='__main__':
         log.warning("KeyboardInterrupt detected")
     except:
         log.critical(traceback.format_exc())
+        err=True
     finally:
         lights.reset_led()
         btn.clean_up()
         log.clean_up()
-        sys.exit()
+        if not err:
+            sys.exit()
         
 else:
     log.debug('Done initializing.')
