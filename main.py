@@ -80,7 +80,7 @@ class log:
                     "funcName": function,
                 }
                 
-            log_dict.update(more_info)
+                log_dict.update(more_info)
         
         #Log the event
         record = logging.makeLogRecord(log_dict)
