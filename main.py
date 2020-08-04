@@ -707,6 +707,10 @@ class music:
     @classmethod
     def _song_finished(cls, *args, **kwargs):
         log.info('Song finished')
+        cls.next_playlist_song()
+        
+    @classmethod
+    def next_playlist_song(cls):
         log.debug('Playlist:', cls.is_playlist, 'loop:', cls.loop)
         
         if cls.is_playlist:
@@ -724,7 +728,6 @@ class music:
             #Loop is on, one song played
             log.info("Loop mode is on, replaying song")
             cls.find_music(cls.last_song)
-            
     
     @classmethod
     def pause(cls, paused=True):
@@ -1151,6 +1154,12 @@ class main_thread:
                     music.playing=True
             else:
                 speak.say("There is no song playing.")
+                
+        elif text=='next' or text=='next song':
+            if music.has_music and music.playing and music.playlist!=[]:
+                music.next_playlist_song()
+            else:
+                aiy.say("There is no playlist playing")
         
         #Here, recognition of the string based on cls.starts(text,'x') is allowed.
         
