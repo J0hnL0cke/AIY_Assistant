@@ -187,7 +187,7 @@ class settings:
             if sub_dict==None:
                 break
         if not sub_dict==None:
-            if create:
+            if create_key:
                 cls.set_value(key,val)
             return sub_dict.value
         else:
